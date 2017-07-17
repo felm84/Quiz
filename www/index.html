@@ -11,13 +11,36 @@ and open the template in the editor.
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <link href="css/jquery.mobile-1.4.5.css" rel="stylesheet" type="text/css"/>
+        <link href="css/jquery.mobile-1.4.5.css" rel="stylesheet" type="text/css"/> 
+        <link href="css/index.css" rel="stylesheet" type="text/css"/>
         <script src="scripts/jquery.js" type="text/javascript"></script>
         <script src="scripts/jquery.mobile-1.4.5.js" type="text/javascript"></script>
         <script src="scripts/index.js" type="text/javascript"></script>
         <title>Deakin - Quiz</title>
     </head>
     <body>
+        <div data-role="page">
+            
+            <div data-role="header">
+                <h1>Login - Quiz</h1>
+            </div>
+            <div data-role="main" class="ui-content center">
+                
+                <form autocomplete="off">
+                    <label for="username">Username:</label>
+                    <input type="text" name="username" id="username" value="">
+                    <label for="password">Password:</label>
+                    <input type="password" name="password" id="password" value="" autocomplete="off">
+                    </br>
+                    <input type="submit" data-theme="b" value="Login">
+                </form>
+                
+            </div>
+            
+            <div data-role="footer" data-position="fixed">
+                <h1>copyright deakin</h1>
+            </div>
+        </div>
         
     </body>
 </html>
