@@ -19,20 +19,73 @@ and open the template in the editor.
         <title>Deakin - Quiz</title>
     </head>
     <body>
-        <div data-role="page">
-            
+        
+        <div data-role="page" id="login">
             <div data-role="header">
                 <h1>Login - Quiz</h1>
+                <div data-role="navbar">
+                    <ul>
+                        <li><a class="ui-btn ui-shadow ui-corner-all ui-btn-icon-top ui-icon-user"
+                               href="javascript:void(0)">Login</a></li>
+                        <li><a class="ui-btn ui-icon-bullets ui-btn-icon-top" 
+                               href="#register">Register</a></li>
+                    </ul>
+                </div>
             </div>
-            <div data-role="main" class="ui-content center">
-                
-                <form autocomplete="off">
+            
+            <br>
+            
+            <div data-role="main" class="ui-content">
+                <form method="post" onsubmit="test()" autocomplete="off">
                     <label for="username">Username:</label>
                     <input type="text" name="username" id="username" value="">
                     <label for="password">Password:</label>
                     <input type="password" name="password" id="password" value="" autocomplete="off">
-                    </br>
+                    <label for="save_login">Save Login</label>
+                    <br>
+                    <input type="checkbox" name="save_login" id="save_login">
+                    <br>
                     <input type="submit" data-theme="b" value="Login">
+                </form>    
+            </div>
+            
+            <div data-role="footer" data-position="fixed">
+                <h1>copyright deakin</h1>
+            </div>
+        </div>
+        
+        <div data-role="page" id="register">
+            
+            <div data-role="header">
+                <h1>Register - Quiz</h1>
+                <div data-role="navbar">
+                    <ul>
+                        <li><a class="ui-btn ui-shadow ui-corner-all ui-btn-icon-top ui-icon-user"
+                               href="#login">Login</a></li>
+                        <li><a class="ui-btn ui-icon-bullets ui-btn-icon-top" 
+                               href="javascript:void(0)">Register</a></li>
+                    </ul>
+                </div>
+            </div>
+            <br>
+            <div data-role="main" class="ui-content">
+                
+                <form method="get" autocomplete="on">
+                    <label for="reg_username">Username:</label>
+                    <input type="text" name="reg_username" id="reg_username" value="">
+                    <label for="reg_password">Password:</label>
+                    <input type="password" name="reg_password" id="reg_password" value="" autocomplete="off">
+                    <label for="rep_reg_password">Repeat Password:</label>
+                    <input type="password" name="rep_reg_password" id="rep_reg_password" value="" autocomplete="off">
+                    <label for="reg_name">Full name:</label>
+                    <input type="text" name="reg_name" id="reg_name" value="">
+                    <label for="reg_email">Email:</label>
+                    <input type="email" name="reg_email" id="reg_email" value="">
+                    <br>
+                    <fieldset class="ui-grid-a">
+                        <div class="ui-block-a"><input type="submit" data-theme="b" value="Register"></div>
+                        <div class="ui-block-b"><input type="reset" data-theme="b" value="Reset"></div>
+                    </fieldset>
                 </form>
                 
             </div>
