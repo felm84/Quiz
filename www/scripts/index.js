@@ -25,3 +25,7 @@ function loadQuizzList(json) {
     for (var i = 0; i < json.length; i++)
         console.log(json[i].title);
 }
+
+function test() {
+    alert("Felipe");
+}
