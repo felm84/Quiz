@@ -5,7 +5,7 @@
  */
 
 
-function loadJsonFile(file, callBack) {
+function loadJsonFile(file, method, callBack) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState === 4 && this.status === 200) {
@@ -13,7 +13,7 @@ function loadJsonFile(file, callBack) {
       callBack(json);
     }
   };
-  xmlhttp.open("GET", file, true);
+  xmlhttp.open(method, file, true);
   xmlhttp.send();
 }
 
@@ -23,10 +23,10 @@ function getCookie(cname) {
     var ca = decodedCookie.split(';');
     for(var i = 0; i <ca.length; i++) {
         var c = ca[i];
-        while (c.charAt(0) == ' ') {
+        while (c.charAt(0) === ' ') {
             c = c.substring(1);
         }
-        if (c.indexOf(name) == 0) {
+        if (c.indexOf(name) === 0) {
             return c.substring(name.length, c.length);
         }
     }
