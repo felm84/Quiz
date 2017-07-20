@@ -4,18 +4,23 @@
  * and open the template in the editor.
  */
 
+$( "document" ).pagecontainer( "change", "questions.html" );
 
+//loadJsonFile("./json/quizzes_sample.json", generateQuizPage);
 
 /* obj constant holds object value 
 * from a json file after executed
 * selectObject function */
-let obj = selectObject(quiz, id);
 
-function selectObject(quizObj, quizId) {
+loadJsonFile("./json/quizzes_sample.json", selectObject);
+
+let id = getCookie("quiz");
+
+function selectObject(obj) {
   
-  for (var i in quizObj) {
-    if (quizObj[i].id === quizId) {
-      return quizObj[i];
+  for (var i in obj) {
+    if (obj[i].id === id) {
+      console.log(obj[i]);
     }
   }
 }
@@ -57,11 +62,3 @@ function extractElementFromObj(obj) {
 //  }
   console.log(obj);
 }
-
-
-
-
-
-
-
-

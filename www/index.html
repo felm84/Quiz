@@ -95,6 +95,58 @@ and open the template in the editor.
         <h1>copyright deakin</h1>
       </div>
     </div>
+    
+    <!-- QUIZ LIST PAGE -->
 
+    <div data-role="page" id="quizList">
+      <div data-role="header" data-position="fixed">
+        <h1>Quiz - List</h1>
+        <a href="#nav-panel" data-icon="bars">Menu</a>
+      </div>
+
+      <div data-role="panel" data-position-fixed="true"
+           data-display="overlay" data-theme="b" id="nav-panel">
+        <ul data-role="listview">
+          <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
+          <li><a href="javascript:void(0)">Load Quiz</a></li>
+          <li data-icon="power"><a href="javascript:void(0)" onclick="logOff()">Logout</a></li>
+        </ul>
+      </div><!-- /panel -->
+
+      <br>
+      <div data-role="main" class="ui-content">
+        
+        <!-- Generates a list of all quizzes available -->
+        <ul data-role="listview" data-filter="true" data-filter-placeholder="Search quiz..." data-inset="true" id="quiz_list">
+        
+        </ul>
+      </div>
+      <div data-role="footer" data-position="fixed">
+        <h1>copyright deakin</h1>
+      </div>
+    </div>
+    
+    <!-- QUESTIONS PAGE -->
+    
+    <div data-role="page" id="questionsPage">
+      <div data-role="header">
+        <a href="quizpage.html" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left"
+           data-transition="slide" data-direction="reverse">Home</a>
+        <h1 class="title">Quiz</h1>
+      </div>
+
+      <br>
+      <div data-role="main" class="ui-content">
+        <form method="post">
+          <fieldset data-role="controlgroup" class="question">
+            
+          </fieldset>
+        </form>
+      </div>
+      <div data-role="footer" data-position="fixed">
+        <h1>copyright deakin</h1>
+      </div>
+    </div>
+    
   </body>
 </html>

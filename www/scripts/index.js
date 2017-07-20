@@ -15,7 +15,7 @@ function loadUser(json) {
   for (var i in json) {
     if (json[i].username === USER && json[i].password === PASS) {
       console.log(json[i].username + " - " + json[i].password);
-      loadQuizPage();
+      loadPage("#quizList");
       break;
     } else {
       console.log("Wrong pass");
@@ -27,10 +27,15 @@ function checkUser() {
   loadJsonFile("./json/users.json", loadUser);
 }
 
-function loadQuizPage() {
-  window.location.href = "quizpage.html";
+function logOff() {
+  //TODO delete all cookies and clear inputs
+  
+  loadPage("#login");
 }
 
+function loadPage(page) {
+  $(":mobile-pagecontainer").pagecontainer("change", page);
+}
 
 function registerUser() {
   let USER = $("#reg_username").val();
@@ -47,6 +52,8 @@ function registerUser() {
     "save": false
   };
 
-  //addUser(obj, "./json/users.json");
+//myObj = obj;
+//myJSON = JSON.stringify(myObj);
+//localStorage.setItem("testJSON", myJSON);
 }
 
