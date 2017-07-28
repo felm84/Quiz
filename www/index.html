@@ -20,9 +20,10 @@ and open the template in the editor.
     <title>Deakin - Quiz</title>
   </head>
   <body>
+    
     <!-- LOGIN PAGE -->
     <div data-role="page" id="login">
-      <div data-role="header">
+      <div data-role="header" data-position="fixed">
         <h1>Login - Quiz</h1>
         <div data-role="navbar">
           <ul>
@@ -37,7 +38,7 @@ and open the template in the editor.
       <br>
 
       <div data-role="main" class="ui-content">
-        <form method="post" onsubmit="checkUser()" autocomplete="off">
+        <form method="post"  autocomplete="off">
           <label for="username">Username:</label>
           <input type="text" name="username" id="username" value="">
           <label for="password">Password:</label>
@@ -46,7 +47,7 @@ and open the template in the editor.
           <br>
           <input type="checkbox" name="save_login" id="save_login">
           <br>
-          <input type="submit" data-theme="b" value="Login">
+          <input type="submit" onclick="checkUser()" data-theme="b" value="Login">
         </form>    
       </div>
 
@@ -54,10 +55,11 @@ and open the template in the editor.
         <h1>copyright deakin</h1>
       </div>
     </div>
+    
     <!-- REGISTER PAGE -->
     <div data-role="page" id="register">
 
-      <div data-role="header">
+      <div data-role="header" data-position="fixed">
         <h1>Register - Quiz</h1>
         <div data-role="navbar">
           <ul>
@@ -97,17 +99,15 @@ and open the template in the editor.
     </div>
     
     <!-- QUIZ LIST PAGE -->
-
     <div data-role="page" id="quizList">
       <div data-role="header" data-position="fixed">
         <h1>Quiz - List</h1>
         <a href="#nav-panel" data-icon="bars">Menu</a>
       </div>
 
-      <div data-role="panel" data-position-fixed="true"
-           data-display="overlay" data-theme="b" id="nav-panel">
+      <div data-role="panel" data-position-fixed="true" data-display="overlay" data-theme="b" id="nav-panel">
         <ul data-role="listview">
-          <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
+          <li data-icon="delete"><a href="javascript:void(0)" data-rel="close">Close</a></li>
           <li><a href="javascript:void(0)">Load Quiz</a></li>
           <li data-icon="power"><a href="javascript:void(0)" onclick="logOff()">Logout</a></li>
         </ul>
@@ -127,26 +127,6 @@ and open the template in the editor.
     </div>
     
     <!-- QUESTIONS PAGE -->
-    
-    <div data-role="page" id="questionsPage">
-      <div data-role="header">
-        <a href="#quizList" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left"
-           data-transition="slide" data-direction="reverse">Home</a>
-        <h1 class="title">Quiz</h1>
-      </div>
-
-      <br>
-      <div data-role="main" class="ui-content">
-        <form method="post">
-          <fieldset data-role="controlgroup" class="question">
-            
-          </fieldset>
-        </form>
-      </div>
-      <div data-role="footer" data-position="fixed">
-        <h1>copyright deakin</h1>
-      </div>
-    </div>
     
   </body>
 </html>
