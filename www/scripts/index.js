@@ -19,7 +19,7 @@
  * index = holds number of questions in #questionCounter
  * object = holds an array with all the questions from selected quiz
  * questions = holds the number of questions selected in questions per page */
-var index = 1;
+var index = 0;
 var object;
 var questions = 1;
 
@@ -128,9 +128,6 @@ function generateQuizPage(obj) {
   // Holds the selected quiz obj in object variable
   object = obj;
   
-  // Sets index 1 to be used in #questionCounter
-  index = 1;
-  
   // Generates head title from the selected quiz
   generateHeaderTitle(object.title);
   
@@ -149,6 +146,8 @@ function generateHeaderTitle(title) {
 function clearPageForm() {
   $(".question").empty();
   $("#qpp").empty();
+  disableElement("#nextBtn");
+  disableElement("#prevBtn");
 }
 
 /* Gets all questions from selected quiz and 
@@ -168,18 +167,9 @@ function getQuestions() {
     // Loads #questionPerPage page
     loadPage("#questionPerPage");
   } else {
-    
+    questions = 1;
     // Shows first question in #question page
-    getFirstQuestion();
-    
-    // Count how many questions quiz has and current question
-    countQuestions(object.questions.length);
-    
-    // Enables next button
-    enableElement("#nextBtn");
-    
-    // Loads page after all questions are appended into DOM
-    loadPage("#question");
+    getFirstQuestion(questions);
   }
 }
 
@@ -199,8 +189,36 @@ function generateQuestionList() {
     $(".question").append(q.buildQuestion());
   });
   
+  $(".question div").first().addClass("first");
+  $(".question div").last().addClass("last");
+  
   // Hide all question from user
   $(".question").children().hide();
+}
+
+/* Generates first questions based on
+ * the number passed as numOfQues parameter */
+function getFirstQuestion(numOfQues) {
+  index = numOfQues;
+   
+  $(".first").addClass("active");
+  
+  if(numOfQues > 1) {
+    for (var i = 1; i < numOfQues; i++) {
+      $(".active").next().addClass("active");
+    }
+  }
+    
+  // Count how many questions quiz has and current question
+  countQuestions(object.questions.length);
+  
+  $(".active").show();
+  
+  // Enables next button
+  enableElement("#nextBtn");
+  
+  // Loads page after all questions are appended into DOM
+  loadPage("#question");
 }
 
 /* Generates a radio option for each index
@@ -223,39 +241,54 @@ function generateQuestionsPerPage() {
   
   // Activates change event listner in .qpp
   $(".qpp").change(function() {
+    
+    // Number of questions to be shown
+    questions = parseInt($(this).val());
+  
     // Loads the number of questions selected by user
-    test($(this).val());
+    getFirstQuestion(questions);
   });
 }
 
-function test(number) {
-  console.log(number);
-  loadPage("#question");
+/* Builds questions based on how many questions
+ * are selected to be presented and button pressed*/
+function buildQuestions(bool) { 
   
-  $(".question div").first().addClass("active");
-  for (var i = 1; i < number; i++) {
-    $(".active").next().addClass("active");
+  let first = $(".active").first();
+  let last = $(".active").last();
+  
+  $(".active").hide();
+  $(".active").removeClass("active");
+  
+  // True = nextQuestion clicked
+  // False = prevQuestion clicked
+  if (bool === true) {
+    last.next().addClass("active");
+    if (questions > 1) {
+      
+      for (var i = 1; i < questions; i++) {
+        if (!$(".active").hasClass("last")) {
+          $(".active").next().addClass("active");
+        }
+      }
+    }
+  } else {
+    first.prev().addClass("active");
+    if (questions > 1 ){
+      for (var i = 1; i < questions; i++) {
+        if (!$(".active").hasClass("first")) {
+          $(".active").prev().addClass("active");
+        } 
+      }
+    }
   }
-  enableElement("#nextBtn");
+  
+  // Shows all .active divs to the user
   $(".active").show();
+  
+  // Updates question counter
   countQuestions(object.questions.length);
 }
-
-/* Generates first single question
- * for quizzes that have not options
- * of questions per page. */
-function getFirstQuestion() {
-  $(".question div").first().addClass("active");
-  $(".active").show();
-}
-
-/* Function to connect global variable to
- * Question constructor, then generates the question*/
-function buildAQuestion() {
-  
-}
-
-//================================================================================================
 
 /* Disables element passed as parameter */
 function disableElement(element) {
@@ -270,42 +303,55 @@ function enableElement(element) {
 /* Function selects and build next question
  * from global variable object */
 function nextQuestion() {
-  index++;
-  if (index === (object.questions.length)) {
+  
+  index += questions;
+  index = index > object.questions.length ? object.questions.length : index;
+  
+  if (index === object.questions.length) {
     disableElement("#nextBtn");
-    $("#questionForm").append("<input type=\"submit\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
+    enableElement("#prevBtn");
+    $(".question").append("<input type=\"submit\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
     loadPage("#question");
   } else {
     enableElement("#prevBtn");
   }
-  $(".active").hide();
-  $(".active").removeClass("active").next().addClass("active");
-  $(".active").show();
-  
-  countQuestions(object.questions.length);
+  buildQuestions(true);
 }
 
 /* Function selects and build previous question
  * from global variable object */
 function prevQuestion() {
-  index--;
-  if (index === 1) {
+  
+  index -= questions;
+  index = index < questions ? questions : index;
+
+  if (index === questions) {
     disableElement("#prevBtn");
+    enableElement("#nextBtn");
   } else {
     enableElement("#nextBtn");
-    $("#submit").remove();
   }
-  $(".active").hide();
-  $(".active").removeClass("active").prev().addClass("active");
-  $(".active").show();
-  
-  countQuestions(object.questions.length);
+  $("#submit").remove();
+  buildQuestions(false);
 }
 
+/* Updates #questionCounter based
+ * on index global variable and 
+ * number of questions available*/
 function countQuestions(length) {
-  $("#questionCounter").html("Question: " + index + "/" + length);
+  
+  if (index > length) {
+    index = length;
+  } else if (index < 1) {
+    index = 1;
+  }
+  $("#questionCounter").html("Question: " + (index) + "/" + length);
 }
 
+/* Object to be generate when user selects
+ * a quiz, it will check every question type
+ * and generate DOM elements to be added on
+ * the page. */
 function Question(question) {
 
   this.Id = question.id;
@@ -355,9 +401,10 @@ function Question(question) {
           break;
       case "scale" :
         q += "<div class=\"ui-field-contain\" id="+pageId+"><label for="+this.Id+">"+this.text+"</label>";
-        q += "<input type=\"range\" class=\"color\" name="+this.Id+" id="+this.Id+" value="+this.question.start+" min="+this.question.start+" max="+this.question.end+" step="+this.question.increment+" data-highlight=\"true\"></div>";
         if (this.question.hasOwnProperty("gradientStart")) {
-          //changeBackgroundColor(gradientStart, gradientEnd, length, value)
+          q += "<input type=\"range\" onchange=\"changeBackgroundColor("+this.Id+")\" name="+this.Id+" id="+this.Id+" value="+this.question.start+" min="+this.question.start+" max="+this.question.end+" step="+this.question.increment+" data-highlight=\"true\"></div>";
+        } else {
+          q += "<input type=\"range\" name="+this.Id+" id="+this.Id+" value="+this.question.start+" min="+this.question.start+" max="+this.question.end+" step="+this.question.increment+" data-highlight=\"true\"></div>";
         }
         break;
       case "multiplechoice" :
@@ -374,13 +421,28 @@ function Question(question) {
 
 }
 
-function changeBackgroundColor(gradientStart, gradientEnd, length, value) {
-  // Converts from hexadecimal to integer
-  let intStart = parseInt(gradientStart.slice(1), 16);
-  let intEnd = parseInt(gradientEnd.slice(1), 16);
-  let fragment = Math.abs(intStart - intEnd) / length;
+/* Changes background color based 
+ * on the value passed as a parameter
+ * from range option */
+function changeBackgroundColor(index) {
+  
+  
+  
+  // Converts from hexadecimal value to integer
+  let intStart = parseInt(object.questions[index - 1].gradientStart.slice(1), 16);
+  let intEnd = parseInt(object.questions[index - 1].gradientEnd.slice(1), 16);
+  
+  // Gets an individual value from the division length
+  let fragment = Math.abs(intStart - intEnd) / object.questions[index - 1].end;
+  
+  var value = $("#"+index).val();
+  
+  // Holds color value
   var color;
   
+  
+  /* Determines which one is bigger value
+   * then converts interger to hexadecimal */
   if (intStart < intEnd) {
     color = ((value * fragment) + intStart).toString(16);
   } else {
@@ -388,9 +450,14 @@ function changeBackgroundColor(gradientStart, gradientEnd, length, value) {
   }
   
   color = "#" + color;
-  //$(".ui-content").css("background-color", color);
+  $(".ui-slider-bg").css("background-color", color);
   console.log(color);
 }
-  
-  
-  
+    
+function presentResult() {
+  loadPage("#result");
+}
+
+function test(number) {
+  console.log(number);
+}

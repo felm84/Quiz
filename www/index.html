@@ -38,7 +38,7 @@ and open the template in the editor.
       <br>
 
       <div data-role="main" class="ui-content">
-        <form method="post"  autocomplete="off">
+        <form method="post" onsubmit="checkUser()" autocomplete="off">
           <label for="username">Username:</label>
           <input type="text" name="username" id="username" value="">
           <label for="password">Password:</label>
@@ -47,7 +47,7 @@ and open the template in the editor.
           <br>
           <input type="checkbox" name="save_login" id="save_login">
           <br>
-          <input type="submit" onclick="checkUser()" data-theme="b" value="Login">
+          <input type="submit"  data-theme="b" value="Login">
         </form>    
       </div>
       
@@ -156,7 +156,7 @@ and open the template in the editor.
       <div data-role="main" class="ui-content">
         <h2 id="questionCounter"></h2>
         <br>
-        <form method="get" class="question" id="questionForm">
+        <form method="get" onsubmit="presentResult()" class="question">
           
           
         </form>
