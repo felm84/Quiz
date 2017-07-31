@@ -50,7 +50,7 @@ and open the template in the editor.
           <input type="submit" onclick="checkUser()" data-theme="b" value="Login">
         </form>    
       </div>
-
+      
       <div data-role="footer" data-position="fixed">
         <h1>copyright deakin</h1>
       </div>
@@ -99,7 +99,7 @@ and open the template in the editor.
     </div>
     
     <!-- QUIZ LIST PAGE -->
-    <div data-role="page" id="quizList">
+    <div data-role="page" id="quiz-list">
       <div data-role="header" data-position="fixed">
         <h1>Quiz - List</h1>
         <a href="#nav-panel" data-icon="bars">Menu</a>
@@ -108,7 +108,7 @@ and open the template in the editor.
       <div data-role="panel" data-position-fixed="true" data-display="overlay" data-theme="b" id="nav-panel">
         <ul data-role="listview">
           <li data-icon="delete"><a href="javascript:void(0)" data-rel="close">Close</a></li>
-          <li><a href="javascript:void(0)">Load Quiz</a></li>
+          <!-- To be added in Assignment02 <li><a href="javascript:void(0)">Load Quiz</a></li>-->
           <li data-icon="power"><a href="javascript:void(0)" onclick="logOff()">Logout</a></li>
         </ul>
       </div><!-- /panel -->
@@ -117,7 +117,7 @@ and open the template in the editor.
       <div data-role="main" class="ui-content">
         
         <!-- Generates a list of all quizzes available -->
-        <ul data-role="listview" data-filter="true" data-filter-placeholder="Search quiz..." data-inset="true" id="quiz_list">
+        <ul data-role="listview" data-filter="true" data-filter-placeholder="Search quiz..." data-inset="true" id="q-list">
         
         </ul>
       </div>
@@ -126,7 +126,71 @@ and open the template in the editor.
       </div>
     </div>
     
+    <!-- QUESTIONS PER PAGE -->
+    <div data-role="page" id="questionPerPage">
+      <div data-role="header" data-position="fixed">
+        <a href="#quiz-list" onclick="clearPageForm()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <h1 class="title">Quiz</h1>
+      </div>
+      <br>
+      <div data-role="main" class="ui-content">
+        <br>
+        <form method="get" id="qpp">
+          
+          
+        </form>
+        <br>
+      </div>
+      <div data-role="footer" data-position="fixed">
+        <h1>copyright deakin</h1>
+      </div>
+    </div>
+    
     <!-- QUESTIONS PAGE -->
+    <div data-role="page" id="question">
+      <div data-role="header" data-position="fixed">
+        <a href="#quiz-list" onclick="clearPageForm()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <h1 class="title">Quiz</h1>
+      </div>
+      <br>
+      <div data-role="main" class="ui-content">
+        <h2 id="questionCounter"></h2>
+        <br>
+        <form method="get" class="question" id="questionForm">
+          
+          
+        </form>
+        <br>
+        <div data-role="navbar">
+            <ul>
+              <li>
+                <a href="#" onclick="prevQuestion()" id="prevBtn" class="ui-state-disabled ui-btn ui-btn-b ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left">Previous</a>
+              </li>
+              <li>
+                <a href="#" onclick="nextQuestion()" id="nextBtn" class="ui-state-disabled ui-btn ui-btn-b ui-shadow ui-corner-all ui-icon-arrow-r ui-btn-icon-right" >Next</a>
+              </li>
+            </ul>
+        </div>
+      </div>
+      <div data-role="footer" data-position="fixed">
+        <h1>copyright deakin</h1>
+      </div>
+    </div>
+    
+    <!-- FORM RESULT -->
+    <div data-role="page" id="result">
+      <div data-role="header" data-position="fixed">
+        <a href="#" data-rel="back" onclick="clearPageForm()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <h1 class="title">Quiz - Result</h1>
+      </div>
+      <br>
+      <div data-role="main" class="ui-content">
+        
+      </div>
+      <div data-role="footer" data-position="fixed">
+        <h1>copyright deakin</h1>
+      </div>
+    </div>
     
   </body>
 </html>

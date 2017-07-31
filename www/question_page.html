@@ -21,7 +21,7 @@ and open the template in the editor.
   </head>
   <body>
     <!-- QUESTIONS PAGE -->
-    <div data-role="page">
+    <div data-role="page" id="question">
       <div data-role="header" data-position="fixed">
         <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
         <h1 class="title">Quiz</h1>
@@ -29,22 +29,23 @@ and open the template in the editor.
       <br>
       <div data-role="main" class="ui-content">
         <h2 id="questionCounter"></h2>
-        <form method="post">
+        <form method="post" id="questionForm">
         <fieldset data-role="controlgroup" class="question">
         
         </fieldset>
+          <div data-role="navbar">
+            <ul>
+              <li>
+                <a href="#" onclick="prevQuestion()" id="prevBtn" class="ui-btn ui-btn-b ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left">Previous</a>
+              </li>
+              <li>
+                <a href="#" onclick="nextQuestion()" id="nextBtn" class="ui-btn ui-btn-b ui-shadow ui-corner-all ui-icon-arrow-r ui-btn-icon-right" >Next</a>
+              </li>
+            </ul>
+        </div>
+          <br>
         </form>
         
-        <div data-role="navbar">
-          <ul>
-            <li>
-              <a href="#" onclick="prevQuestion()" id="prevBtn" class="ui-btn ui-btn-b ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left">Previous</a>
-            </li>
-            <li>
-              <a href="#" onclick="nextQuestion()" id="nextBtn" class="ui-btn ui-btn-b ui-shadow ui-corner-all ui-icon-arrow-r ui-btn-icon-right" >Next</a>
-            </li>
-          </ul>
-        </div>
       </div>
       <div data-role="footer" data-position="fixed">
         <h1>copyright deakin</h1>
