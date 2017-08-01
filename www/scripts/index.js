@@ -1,7 +1,9 @@
 /* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This files was created by Felipe Menezes
+ * on 12/07/2017. 
+ * This is a quiz app required by SIT313 - Mobile Computing
+ * for assignment01.
+ * 
  */
 
 // Submit form result
@@ -360,7 +362,9 @@ function Question(question) {
   this.help = question.help;
   this.question = question;
 
-
+  /* Constructor will be used to filter all
+   * questions from json file and loads the
+   * right input type into DOM */
   this.buildQuestion = function() {
     var q = "";
     var pageId = "q" + this.Id;
@@ -425,21 +429,19 @@ function Question(question) {
  * on the value passed as a parameter
  * from range option */
 function changeBackgroundColor(index) {
-  
-  
+  let question = object.questions[index - 1];
   
   // Converts from hexadecimal value to integer
-  let intStart = parseInt(object.questions[index - 1].gradientStart.slice(1), 16);
-  let intEnd = parseInt(object.questions[index - 1].gradientEnd.slice(1), 16);
+  let intStart = parseInt(question.gradientStart.slice(1), 16);
+  let intEnd = parseInt(question.gradientEnd.slice(1), 16);
   
   // Gets an individual value from the division length
-  let fragment = Math.abs(intStart - intEnd) / object.questions[index - 1].end;
+  let fragment = Math.abs(intStart - intEnd) / question.end;
   
   var value = $("#"+index).val();
   
   // Holds color value
   var color;
-  
   
   /* Determines which one is bigger value
    * then converts interger to hexadecimal */
@@ -451,13 +453,8 @@ function changeBackgroundColor(index) {
   
   color = "#" + color;
   $(".ui-slider-bg").css("background-color", color);
-  console.log(color);
 }
     
 function presentResult() {
   loadPage("#result");
-}
-
-function test(number) {
-  console.log(number);
 }
