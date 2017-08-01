@@ -1,10 +1,13 @@
 /* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This files was created by Felipe Menezes
+ * on 12/07/2017. 
+ * This is a quiz app required by SIT313 - Mobile Computing
+ * for assignment01.
+ * 
  */
 
-
+/* Makes a request and returns data back to
+ * callBack function */
 function loadJsonFile(file, method, callBack) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
@@ -17,6 +20,7 @@ function loadJsonFile(file, method, callBack) {
   xmlhttp.send();
 }
 
+/* Gets cookie passed as a parameter */
 function getCookie(cname) {
     var name = cname + "=";
     var decodedCookie = decodeURIComponent(document.cookie);
