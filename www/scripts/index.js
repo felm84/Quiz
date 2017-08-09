@@ -6,6 +6,10 @@
  * 
  */
 
+
+
+
+
 // Submit form result
 // 
 // 1=2017-07-29&
@@ -21,8 +25,13 @@
  * index = holds number of questions in #questionCounter
  * object = holds an array with all the questions from selected quiz
  * questions = holds the number of questions selected in questions per page */
+let URL = "http://introtoapps.com/datastore.php?";
+let SID = "&appid=215242834";
+var action = "action=load";
+var objectID = "&objectid=quizzes.json";
 var index = 0;
 var object;
+var quiz;
 var questions = 1;
 
 /* Checks user acount when form login is submitted*/
@@ -32,7 +41,7 @@ function loadUser(json) {
   for (var i in json) {
     if (json[i].username === USER && json[i].password === PASS) {
       loadPage("#quiz-list");
-      loadJsonFile("./json/quizzes_sample.json", "GET", loadQuiz);
+      loadJsonFile(URL + action + SID + objectID, "GET", loadQuiz);
       break;
     } else {
       // TODO implement error message
@@ -80,16 +89,22 @@ function registerUser() {
     "save": false
   };
 
-//myObj = obj;
-//myJSON = JSON.stringify(myObj);
-//localStorage.setItem("testJSON", myJSON);
+//var myObj = obj;
+//var myJSON = JSON.stringify(myObj);
+//localStorage.setItem("register", myJSON);
+
+var retrieveObj = localStorage.getItem("register");
+console.log("retrieved: ", JSON.parse(retrieveObj));
 }
 
 
 /* Loads and generates a list of
  * all quizzes available from json file*/
 function loadQuiz(quiz) {
+  object = quiz;
+
   var list = "";
+  
   /* Loops through the quiz object and
    * convert it into HTML list tags */
   for (var i in quiz) {
@@ -109,29 +124,32 @@ function loadQuiz(quiz) {
     let id = $(this).attr("id");
     // Generates a cookie to be used in #question
     document.cookie = "quiz="+id;
-    loadJsonFile("./json/quizzes_sample.json", "GET", selectObject);
+    
+    selectObject();
+    //loadJsonFile(URL + action + SID + objectID, "GET", selectObject);
   }); 
 }
 
 /* Compares the selected quiz with
  * all the available in the json
  * file, then generates the quiz page*/
-function selectObject(obj) {
+function selectObject() {
   let id = getCookie("quiz");
-  for (var i in obj) {
-    if (obj[i].id === id) {
-      generateQuizPage(obj[i]);
+  for (var i in object) {
+    if (object[i].id === id) {
+      generateQuizPage(object[i]);
+      break;
     }
   }
 }
 
 /* Generates parts of a quiz page*/
-function generateQuizPage(obj) {
-  // Holds the selected quiz obj in object variable
-  object = obj;
+function generateQuizPage(selectedQuiz) {
+    
+  quiz = selectedQuiz;
   
   // Generates head title from the selected quiz
-  generateHeaderTitle(object.title);
+  generateHeaderTitle(quiz.title);
   
   // Finds which quiz was selected
   getQuestions();
@@ -161,7 +179,7 @@ function getQuestions() {
   generateQuestionList();
   
   // Finds out if selected quiz has questionsPerPage option
-  if (object.hasOwnProperty('questionsPerPage')) {
+  if (quiz.hasOwnProperty('questionsPerPage')) {
     
     // Generates questions per page option
     generateQuestionsPerPage();
@@ -182,7 +200,7 @@ function generateQuestionList() {
   var questions = [];
 
   // creates a new Question object for each question
-  object.questions.forEach(function(q) {
+  quiz.questions.forEach(function(q) {
     questions.push(new Question(q));
   });
 
@@ -212,7 +230,7 @@ function getFirstQuestion(numOfQues) {
   }
     
   // Count how many questions quiz has and current question
-  countQuestions(object.questions.length);
+  countQuestions(quiz.questions.length);
   
   $(".active").show();
   
@@ -229,7 +247,7 @@ function getFirstQuestion(numOfQues) {
 function generateQuestionsPerPage() {
   var q = "";
   q += "<div class=\"ui-field-contain\"><legend>Questions per page:</legend>";
-  object.questionsPerPage.forEach(function(a){
+  quiz.questionsPerPage.forEach(function(a){
     q += "<label for="+a+">"+a+"</label>";
     q += "<input type=\"radio\" class=\"qpp\" name=\"qpp\" id="+a+" value="+a+">";
   });
@@ -289,7 +307,7 @@ function buildQuestions(bool) {
   $(".active").show();
   
   // Updates question counter
-  countQuestions(object.questions.length);
+  countQuestions(quiz.questions.length);
 }
 
 /* Disables element passed as parameter */
@@ -307,9 +325,9 @@ function enableElement(element) {
 function nextQuestion() {
   
   index += questions;
-  index = index > object.questions.length ? object.questions.length : index;
+  index = index > quiz.questions.length ? quiz.questions.length : index;
   
-  if (index === object.questions.length) {
+  if (index === quiz.questions.length) {
     disableElement("#nextBtn");
     enableElement("#prevBtn");
     $(".question").append("<input type=\"submit\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
@@ -456,5 +474,8 @@ function changeBackgroundColor(index) {
 }
     
 function presentResult() {
-  loadPage("#result");
+  
+  console.log($(".question").serialize());
+  
+  //loadPage("#result");
 }
