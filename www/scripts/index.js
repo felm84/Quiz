@@ -226,24 +226,81 @@ function getQuestions() {
  * into DOM objects and append them into the
  * .question page */
 function generateQuestionList() {
-  var questions = [];
 
-  // creates a new Question object for each question
+  // creates a DOM element for each question
   quiz.questions.forEach(function(q) {
-    questions.push(new Question(q));
+    $(".question").append(BuildQuestions(q));
   });
 
-  // Loads all questions into DOM
-  questions.forEach(function(q) {
-    $(".question").append(q.buildQuestion());
-  });
-  
   $(".question div").first().addClass("first");
   $(".question div").last().addClass("last");
   
   // Hide all question from user
   $(".question").children().hide();
 }
+
+/* BuildQuestions function generate question
+ * generate DOM elements to be added on when 
+ * user selects a quiz, it will check every 
+ * question type and select the right one. */
+function BuildQuestions(question) {
+    var q = "";
+    var id = "q" + question.id;
+    
+    switch (question.type) {
+      case "date" :
+        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+        q += "<input type="+question.type+" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
+        break;
+      case "textbox" :
+        if (question.help === undefined) question.help = "";
+        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+        q += "<input type=\"text\" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
+        break;
+      case "textarea" :
+        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+        q += "<textarea cols=\"40\" rows=\"5\" name="+question.id+" id="+question.id+">"+question.help+"</textarea></div>";
+        break;
+      case "choice" :
+        q += "<div class=\"ui-field-contain\" id="+id+"><label class=\"select\" for="+question.id+">"+question.text+"</label>";
+        q += "<select name="+question.id+" id="+question.id+" data-inline=\"true\">";
+        question.options.forEach(function(a) {
+          q += "<option value="+a+">"+a+"</option>";
+        });
+        q += "</select></div>";    
+        break;
+        case "slidingoption" :
+          q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>"; 
+          question.options.forEach(function(a) {
+            q += "<input type=\"radio\" name=\"radio01\" id="+a+" value="+a+">";
+            q += "<label for="+a+">"+a+"</label>";
+          });
+          q += "<br>";
+          question.optionVisuals.forEach(function(a) {
+            q += "<input type=\"radio\" name=\"radio02\" id="+a+" value="+a+">";
+            q += "<label for="+a+">"+a+"</label>";
+          });
+          q += "</div>";
+          break;
+      case "scale" :
+        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+        if (question.hasOwnProperty("gradientStart")) {
+          q += "<input type=\"range\" onchange=\"changeBackgroundColor("+question.id+")\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
+        } else {
+          q += "<input type=\"range\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
+        }
+        break;
+      case "multiplechoice" :
+        q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>";
+         question.options.forEach(function(a) {
+            q += "<input type=\"checkbox\" name="+a+" id="+a+" value="+a+">";
+            q += "<label for="+a+">"+a+"</label>";
+          });
+        q += "</div>";
+        break;
+    }
+    return q;
+  };
 
 /* Generates first questions based on
  * the number passed as numOfQues parameter */
@@ -395,81 +452,6 @@ function countQuestions(length) {
     index = 1;
   }
   $("#questionCounter").html("Question: " + (index) + "/" + length);
-}
-
-/* Object to be generate when user selects
- * a quiz, it will check every question type
- * and generate DOM elements to be added on
- * the page. */
-function Question(question) {
-
-  this.Id = question.id;
-  this.text = question.text;
-  this.type = question.type;
-  this.help = question.help;
-  this.question = question;
-
-  /* Constructor will be used to filter all
-   * questions from json file and loads the
-   * right input type into DOM */
-  this.buildQuestion = function() {
-    var q = "";
-    var pageId = "q" + this.Id;
-    switch (this.question.type) {
-      case "date" :
-        q += "<div class=\"ui-field-contain\" id="+pageId+"><label for="+this.Id+">"+this.text+"</label>";
-        q += "<input type="+this.type+" name="+this.Id+" id="+this.Id+" placeholder="+this.help+"></div>";
-        break;
-      case "textbox" :
-        if (this.help === undefined) this.help = "";
-        q += "<div class=\"ui-field-contain\" id="+pageId+"><label for="+this.Id+">"+this.text+"</label>";
-        q += "<input type=\"text\" name="+this.Id+" id="+this.Id+" placeholder="+this.help+"></div>";
-        break;
-      case "textarea" :
-        q += "<div class=\"ui-field-contain\" id="+pageId+"><label for="+this.Id+">"+this.text+"</label>";
-        q += "<textarea cols=\"40\" rows=\"5\" name="+this.Id+" id="+this.Id+">"+this.help+"</textarea></div>";
-        break;
-      case "choice" :
-        q += "<div class=\"ui-field-contain\" id="+pageId+"><label class=\"select\" for="+this.Id+">"+this.text+"</label>";
-        q += "<select name="+this.Id+" id="+this.Id+" data-inline=\"true\">";
-        this.question.options.forEach(function(a) {
-          q += "<option value="+a+">"+a+"</option>";
-        });
-        q += "</select></div>";    
-        break;
-        case "slidingoption" :
-          q += "<div class=\"ui-field-contain\" id="+pageId+"><legend>"+this.text+"</legend>"; 
-          this.question.options.forEach(function(a) {
-            q += "<input type=\"radio\" name=\"radio01\" id="+a+" value="+a+">";
-            q += "<label for="+a+">"+a+"</label>";
-          });
-          q += "<br>";
-          this.question.optionVisuals.forEach(function(a) {
-            q += "<input type=\"radio\" name=\"radio02\" id="+a+" value="+a+">";
-            q += "<label for="+a+">"+a+"</label>";
-          });
-          q += "</div>";
-          break;
-      case "scale" :
-        q += "<div class=\"ui-field-contain\" id="+pageId+"><label for="+this.Id+">"+this.text+"</label>";
-        if (this.question.hasOwnProperty("gradientStart")) {
-          q += "<input type=\"range\" onchange=\"changeBackgroundColor("+this.Id+")\" name="+this.Id+" id="+this.Id+" value="+this.question.start+" min="+this.question.start+" max="+this.question.end+" step="+this.question.increment+" data-highlight=\"true\"></div>";
-        } else {
-          q += "<input type=\"range\" name="+this.Id+" id="+this.Id+" value="+this.question.start+" min="+this.question.start+" max="+this.question.end+" step="+this.question.increment+" data-highlight=\"true\"></div>";
-        }
-        break;
-      case "multiplechoice" :
-        q += "<div class=\"ui-field-contain\" id="+pageId+"><legend>"+this.text+"</legend>";
-         this.question.options.forEach(function(a) {
-            q += "<input type=\"checkbox\" name="+a+" id="+a+" value="+a+">";
-            q += "<label for="+a+">"+a+"</label>";
-          });
-        q += "</div>";
-        break;
-    }
-    return q;
-  };
-
 }
 
 /* Changes background color based 
