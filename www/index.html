@@ -42,17 +42,18 @@
       <br>
 
       <div data-role="main" class="ui-content">
-        <form method="post" onsubmit="checkUser()" autocomplete="off">
+        <h1>Welcome!</h1>
+        <form method="post" id="check-user" autocomplete="off">
           <label for="username">Username:</label>
           <input type="text" name="username" id="username" value="">
           <label for="password">Password:</label>
           <input type="password" name="password" id="password" value="" autocomplete="off">
-          <label for="save_login">Save Login</label>
+          <label for="save_login">Remember Me</label>
           <br>
           <input type="checkbox" name="save_login" id="save_login">
           <br>
-          <input type="submit"  data-theme="b" value="Login">
-        </form>    
+          <input type="button" onclick="checkUser()" data-theme="b" value="Login">
+        </form>
       </div>
       
       <div data-role="footer" data-position="fixed">

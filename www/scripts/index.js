@@ -45,6 +45,7 @@ function loadUser(json) {
       break;
     } else {
       // TODO implement error message
+      loadPage("#login-error");
       console.log("Wrong pass");
     }
   }
@@ -52,8 +53,36 @@ function loadUser(json) {
 
 /* Checks user acount when form login is submitted*/
 function checkUser() {
-  loadJsonFile("./json/users.json", "GET", loadUser);
+  loadJsonFile(URL + action + SID + "&objectid=users.json", "GET", loadUser);
 }
+/*function checkUser() {
+  
+  $.ajax({
+      url: 'http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json',
+      data: $('#check-user').serialize(),
+      type: 'GET',
+      beforeSend: function () {
+          // This callback function will trigger before data is sent
+          //$.mobile.showPageLoadingMsg(true); // This will show ajax spinner
+          console.log("LOADING...");
+      },
+      complete: function () {
+          // This callback function will trigger on data sent/received complete
+          //$.mobile.hidePageLoadingMsg(); // This will hide ajax spinner
+          console.log("COMPLETE...");
+          loadPage("#quiz-list");
+      },
+      success: function (result) {
+          console.log(result);
+      },
+      error: function (request, error) {
+          // This callback function will trigger on unsuccessful action                
+          console.log("An error occurred: " + status + "nError: " + error);
+      }
+  });
+  
+  //loadJsonFile(URL + action + SID + "&objectid=users.json", "POST", loadUser);
+}*/
 
 /* Logs off and clear all values 
  * and return to #login page*/
@@ -447,7 +476,7 @@ function Question(question) {
  * on the value passed as a parameter
  * from range option */
 function changeBackgroundColor(index) {
-  let question = object.questions[index - 1];
+  let question = quiz.questions[index - 1];
   
   // Converts from hexadecimal value to integer
   let intStart = parseInt(question.gradientStart.slice(1), 16);
