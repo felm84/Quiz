@@ -34,63 +34,187 @@ var object;
 var quiz;
 var questions = 1;
 
+
+
 /* Checks user acount when form login is submitted*/
-function loadUser(json) {
-  let USER = $("#username").val();
-  let PASS = $("#password").val();
-  for (var i in json) {
-    if (json[i].username === USER && json[i].password === PASS) {
-      loadPage("#quiz-list");
-      loadJsonFile(URL + action + SID + objectID, "GET", loadQuiz);
-      break;
-    } else {
-      // TODO implement error message
-      loadPage("#login-error");
-      console.log("Wrong pass");
+function CheckUser(users) {
+  
+  let id = "#login_error";
+  var result = -1;
+  
+  if ($("#user").val() !== "" || $("#pass").val() !== "") {
+    for(var u in users) {
+      if($("#user").val() === users[u].username && $("#pass").val() === users[u].password) {
+        result = 0;
+      }
     }
+  } else {
+    result = -2;
+  }
+  
+  switch(result) {
+    case -2:
+      GenerateError(id, "<p>You missed your Username or Password!</p>");
+      break;
+    case -1:
+      GenerateError(id, "<p>Wrong Username or Password!</p>");
+      break;
+    default:
+      Request(URL + action + SID + objectID, "GET", "json", LoadQuiz);
+      $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
+        role: "page",
+        transition: "flip"
+      });
+      break;
   }
 }
 
-/* Checks user acount when form login is submitted*/
-function checkUser() {
-  loadJsonFile(URL + action + SID + "&objectid=users.json", "GET", loadUser);
+// Generate popup error information
+function GenerateError(id, error) {
+  $(id + " p").remove("p");
+  $(id).append(error);
+  $(id).popup("open");
 }
-/*function checkUser() {
+
+/* Checks user acount when login button is clicked*/
+function LoadUser() {
+  // Make a request to find user account.
+  Request(URL + action + SID + "&objectid=users.json", "GET", "json", CheckUser);
+ 
+}
+
+/* TODO:
+ * It will be implemented in Assignment02 */
+function RegisterUser() {
+ 
+  var data = $("#register_form").serialize().split("&");
+  var obj={};
+  for(var key in data)
+  {
+    obj[data[key].split("=")[0]] = data[key].split("=")[1];
+  }
   
-  $.ajax({
-      url: 'http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json',
-      data: $('#check-user').serialize(),
-      type: 'GET',
-      beforeSend: function () {
-          // This callback function will trigger before data is sent
-          //$.mobile.showPageLoadingMsg(true); // This will show ajax spinner
-          console.log("LOADING...");
-      },
-      complete: function () {
-          // This callback function will trigger on data sent/received complete
-          //$.mobile.hidePageLoadingMsg(); // This will hide ajax spinner
-          console.log("COMPLETE...");
-          loadPage("#quiz-list");
-      },
-      success: function (result) {
-          console.log(result);
-      },
-      error: function (request, error) {
-          // This callback function will trigger on unsuccessful action                
-          console.log("An error occurred: " + status + "nError: " + error);
+  for (var i in obj) {
+    if (obj[i] !== "") {
+      if (!CheckInputs(i, obj[i])) {
+        break;
       }
+    } else {
+      GenerateError("#register_error", "<p>Please, fill all inputs up!</p>");
+      break;
+    }
+  }
+  
+  data = JSON.stringify(obj);
+   
+  //var url = URL + "action=append" + SID + "&objectid=users.json&data=" + data;
+  
+  //Request(url, "POST", "post", LogOff); 
+}
+
+function CheckInputs(key, value) {
+  
+  var result = false;
+  
+  switch(key) {
+    case "username":
+      CheckUsername(value);
+      break;
+    case "password":
+      CheckPassword(value);
+      break;
+    case "name":
+      CheckName(value);
+      break;
+    case "email":
+      CheckEmail(value);
+      break;
+  }
+  return result;
+}
+
+function CheckUsername(value) {
+  
+  Request(URL + action + SID + "&objectid=users.json", "GET", "json", function(data) {
+    let regex = /^(\w+)$/;
+
+    if (value.length < 4 || value.length > 10) {
+      GenerateError("#register_error", "<p>Username must have between 4 and 10 characters!</p>");
+    } else if (!value.match(regex)) {
+      GenerateError("#register_error", "<p>Username accepts letters and numbers only!</p>");
+    } else {
+      
+      for (var u in data) {
+        if (data[u].username === value) {
+          GenerateError("#register_error", "<p>Username already taken!</p>");
+          break;
+        }
+      }
+    }
+    
   });
   
-  //loadJsonFile(URL + action + SID + "&objectid=users.json", "POST", loadUser);
-}*/
+}
+
+function CheckPassword(value) {
+  
+  if (value.length < 5 || value.length > 15) {
+    GenerateError("#register_error", "<p>Please, Password must have between 5 and 15 characters!</p>");
+  }
+}
+
+function CheckName(value) {
+  
+  let regex = /^([a-zA-Z\s])+/;
+  
+  if (value.length < 2 || value.length > 40) {
+    GenerateError("#register_error", "<p>Please, Full name must have between 2 and 40 characters!</p>");
+  } else if (!value.match(regex)) {
+    GenerateError("#register_error", "<p>Please, Full name accepts letters only!</p>");
+  }
+}
+
+function CheckEmail(value) {
+  
+  let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  
+  if (!value.match(regex)) {
+    GenerateError("#register_error", "<p>Please, Use a valid email!</p>");
+  }
+}
+
+function Request(url, type, dataType, callBack) {
+  $.ajax ({
+    url: url,
+    type: type,
+    dataType: dataType,
+    complete: function () {
+      // This callback function will trigger on data sent/received complete
+      console.log("COMPLETE...");
+ 
+    },
+    success: function(data) {
+      callBack(data);
+    },
+    error: function (error) {
+      // This callback function will trigger on unsuccessful action                
+      console.log(error);
+    }
+  });
+}
 
 /* Logs off and clear all values 
  * and return to #login page*/
-function logOff() {
+function LogOff() {
   //TODO delete all cookies and clear inputs
-  $("#username").val("");
-  $("#password").val("");
-  loadPage("index.html");
+  $('#login_form').trigger("reset");
+  $('#register_form').trigger("reset");
+  
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html", { 
+    role: "page",
+    transition: "flip",
+    reverse: true
+  });
 }
 
 /* Loads the page which passes through
@@ -101,35 +225,9 @@ function loadPage(page) {
   $( '.ui-content' ).trigger( 'create' );
 }
 
-/* TODO:
- * It will be implemented in Assignment02 */
-function registerUser() {
-  let USER = $("#reg_username").val();
-  let PASS = $("#reg_password").val();
-  let RPASS = $("#rep_reg_password").val();
-  let NAME = $("#reg_name").val();
-  let EMAIL = $("#reg_email").val();
-
-  var obj = {
-    "username": USER,
-    "password": RPASS,
-    "name": NAME,
-    "email": EMAIL,
-    "save": false
-  };
-
-//var myObj = obj;
-//var myJSON = JSON.stringify(myObj);
-//localStorage.setItem("register", myJSON);
-
-var retrieveObj = localStorage.getItem("register");
-console.log("retrieved: ", JSON.parse(retrieveObj));
-}
-
-
 /* Loads and generates a list of
  * all quizzes available from json file*/
-function loadQuiz(quiz) {
+function LoadQuiz(quiz) {
   object = quiz;
 
   var list = "";
@@ -485,6 +583,11 @@ function changeBackgroundColor(index) {
 }
     
 function presentResult() {
+  
+  
+  //var myObj = obj;
+  //var myJSON = JSON.stringify(myObj);
+  //localStorage.setItem("register", myJSON);
   
   console.log($(".question").serialize());
   

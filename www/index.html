@@ -31,9 +31,9 @@
         <h1>Login - Quiz</h1>
         <div data-role="navbar">
           <ul>
-            <li><a class="ui-btn-active ui-btn ui-shadow ui-corner-all ui-btn-icon-top ui-icon-user"
+            <li><a class="ui-btn-active ui-btn ui-shadow ui-btn-icon-top ui-icon-user"
                    href="javascript:void(0)">Login</a></li>
-            <li><a class="ui-btn ui-icon-bullets ui-btn-icon-top" 
+            <li><a class="ui-btn ui-shadow ui-icon-bullets ui-btn-icon-top" 
                    href="#register" data-transition="flip">Register</a></li>
           </ul>
         </div>
@@ -43,17 +43,23 @@
 
       <div data-role="main" class="ui-content">
         <h1>Welcome!</h1>
-        <form method="post" id="check-user" autocomplete="off">
-          <label for="username">Username:</label>
-          <input type="text" name="username" id="username" value="">
-          <label for="password">Password:</label>
-          <input type="password" name="password" id="password" value="" autocomplete="off">
-          <label for="save_login">Remember Me</label>
+        <form method="get" id="login_form" autocomplete="off">
+          <label for="user">Username:</label>
+          <input type="text" name="user" id="user" value="">
+          <label for="pass">Password:</label>
+          <input type="password" name="pass" id="pass" value="" autocomplete="off">
+          
           <br>
-          <input type="checkbox" name="save_login" id="save_login">
-          <br>
-          <input type="button" onclick="checkUser()" data-theme="b" value="Login">
+          <input type="button" onclick="LoadUser()" data-theme="b" value="Login">
         </form>
+        
+      </div>
+      
+      <div data-role="popup" id="login_error" data-theme="a" class="ui-content">
+        <div data-role="header" data-theme="b">
+          <h1>Error:</h1>
+        </div>
+        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a> 
       </div>
       
       <div data-role="footer" data-position="fixed">
@@ -68,9 +74,9 @@
         <h1>Register - Quiz</h1>
         <div data-role="navbar">
           <ul>
-            <li><a class="ui-btn ui-shadow ui-corner-all ui-btn-icon-top ui-icon-user"
+            <li><a class="ui-btn ui-shadow ui-btn-icon-top ui-icon-user"
                    href="#login" data-transition="flip" data-direction="reverse">Login</a></li>
-            <li><a class="ui-btn-active ui-btn ui-icon-bullets ui-btn-icon-top" 
+            <li><a class="ui-btn-active ui-btn ui-shadow ui-icon-bullets ui-btn-icon-top" 
                    href="javascript:void(0)">Register</a></li>
           </ul>
         </div>
@@ -78,24 +84,29 @@
       <br>
       <div data-role="main" class="ui-content">
 
-        <form method="post" onsubmit="registerUser()" autocomplete="on">
-          <label for="reg_username">Username:</label>
-          <input type="text" name="reg_username" id="reg_username" value="">
-          <label for="reg_password">Password:</label>
-          <input type="password" name="reg_password" id="reg_password" value="" autocomplete="off">
-          <label for="rep_reg_password">Repeat Password:</label>
-          <input type="password" name="rep_reg_password" id="rep_reg_password" value="" autocomplete="off">
-          <label for="reg_name">Full name:</label>
-          <input type="text" name="reg_name" id="reg_name" value="">
-          <label for="reg_email">Email:</label>
-          <input type="email" name="reg_email" id="reg_email" value="">
+        <form method="get" id="register_form" autocomplete="off">
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username">
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password">
+          <label for="name">Full name:</label>
+          <input type="text" name="name" id="name">
+          <label for="email">Email:</label>
+          <input type="email" name="email" id="email">
           <br>
           <fieldset class="ui-grid-a">
             <div class="ui-block-a"><input type="reset" data-theme="b" value="Reset"></div>
-            <div class="ui-block-b"><input type="submit" data-theme="b" value="Register"></div>
+            <div class="ui-block-b"><input type="button" onclick="RegisterUser()" data-theme="b" value="Register"></div>
           </fieldset>
         </form>
-
+        
+        <div data-role="popup" id="register_error" data-theme="a" class="ui-content">
+          <div data-role="header" data-theme="b">
+            <h1>Error:</h1>
+          </div>
+          <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a> 
+        </div>
+        
       </div>
 
       <div data-role="footer" data-position="fixed">
@@ -111,11 +122,11 @@
       </div>
 
       <div data-role="panel" data-position-fixed="true" data-display="overlay" data-theme="b" id="nav-panel">
-        <ul data-role="listview">
-          <li data-icon="delete"><a href="javascript:void(0)" data-rel="close">Close</a></li>
-          <!-- To be added in Assignment02 <li><a href="javascript:void(0)">Load Quiz</a></li>-->
-          <li data-icon="power"><a href="javascript:void(0)" onclick="logOff()">Logout</a></li>
-        </ul>
+        <ul data-role="listview">
+          <li data-icon="delete"><a href="javascript:void(0)" data-rel="close">Close</a></li>
+          <!-- To be added in Assignment02 <li><a href="javascript:void(0)">Load Quiz</a></li>-->
+          <li data-icon="power"><a href="javascript:void(0)" onclick="LogOff()">Logout</a></li>
+        </ul>
       </div><!-- /panel -->
 
       <br>
