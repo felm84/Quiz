@@ -50,7 +50,7 @@
           <input type="password" name="pass" id="pass" value="" autocomplete="off">
           
           <br>
-          <input type="button" onclick="LoadUser()" data-theme="b" value="Login">
+          <input type="button" onclick="loadUser()" data-theme="b" value="Login">
         </form>
         
       </div>
@@ -96,7 +96,7 @@
           <br>
           <fieldset class="ui-grid-a">
             <div class="ui-block-a"><input type="reset" data-theme="b" value="Reset"></div>
-            <div class="ui-block-b"><input type="button" onclick="RegisterUser()" data-theme="b" value="Register"></div>
+            <div class="ui-block-b"><input type="button" onclick="registerUser()" data-theme="b" value="Register"></div>
           </fieldset>
         </form>
         
@@ -125,12 +125,13 @@
         <ul data-role="listview">
           <li data-icon="delete"><a href="javascript:void(0)" data-rel="close">Close</a></li>
           <!-- To be added in Assignment02 <li><a href="javascript:void(0)">Load Quiz</a></li>-->
-          <li data-icon="power"><a href="javascript:void(0)" onclick="LogOff()">Logout</a></li>
+          <li data-icon="power"><a href="javascript:void(0)" onclick="logOff()">Logout</a></li>
         </ul>
       </div><!-- /panel -->
 
       <br>
       <div data-role="main" class="ui-content">
+        <h2 id="color-name"></h2>
         
         <!-- Generates a list of all quizzes available -->
         <ul data-role="listview" data-filter="true" data-filter-placeholder="Search quiz..." data-inset="true" id="q-list">
@@ -145,7 +146,7 @@
     <!-- QUESTIONS PER PAGE -->
     <div data-role="page" id="questionPerPage">
       <div data-role="header" data-position="fixed">
-        <a href="#quiz-list" onclick="clearPageForm()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <a href="#quiz-list" onclick="clearForms()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
         <h1 class="title">Quiz</h1>
       </div>
       <br>
@@ -165,14 +166,14 @@
     <!-- QUESTIONS PAGE -->
     <div data-role="page" id="question">
       <div data-role="header" data-position="fixed">
-        <a href="#quiz-list" onclick="clearPageForm()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <a href="#quiz-list" onclick="clearForms()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
         <h1 class="title">Quiz</h1>
       </div>
       <br>
       <div data-role="main" class="ui-content">
         <h2 id="questionCounter"></h2>
         <br>
-        <form method="get" onsubmit="presentResult()" class="question">
+        <form method="get" class="question">
           
           
         </form>
@@ -188,6 +189,14 @@
             </ul>
         </div>
       </div>
+      
+      <div data-role="popup" id="answer_error" data-theme="a" class="ui-content">
+        <div data-role="header" data-theme="b">
+          <h1>Error:</h1>
+        </div>
+        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a> 
+      </div>
+      
       <div data-role="footer" data-position="fixed">
         <h1>copyright deakin</h1>
       </div>

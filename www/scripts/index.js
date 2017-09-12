@@ -7,23 +7,9 @@
  */
 
 
-
-
-
-// Submit form result
-// 
-// 1=2017-07-29&
-// 2=Felipe+Menezes&
-// 3=Write+4+paragraphs%0D%0Afsdfs%0D%0Asdf%0D%0Asdf&
-// 4=Male&
-// radio01=Happy&
-// radio02=😆&
-// 6=3&
-// 7=0.03
-
 /* GLOBAL VARIABLES
  * index = holds number of questions in #questionCounter
- * object = holds an array with all the questions from selected quiz
+ * object = hold all quizzes object from quizzes.json file
  * questions = holds the number of questions selected in questions per page */
 let URL = "http://introtoapps.com/datastore.php?";
 let SID = "&appid=215242834";
@@ -33,59 +19,54 @@ var index = 0;
 var object;
 var quiz;
 var questions = 1;
-
+var score = 0;
 
 
 /* Checks user acount when form login is submitted*/
-function CheckUser(users) {
+function checkUser(users) {
   
   let id = "#login_error";
-  var result = -1;
   
-  if ($("#user").val() !== "" || $("#pass").val() !== "") {
-    for(var u in users) {
-      if($("#user").val() === users[u].username && $("#pass").val() === users[u].password) {
-        result = 0;
+  if ($("#user").val() !== "" && $("#pass").val() !== "") {
+    for (var u in users) {
+      if ($("#user").val() === users[u].username && $("#pass").val() === users[u].password) {
+                
+        $("#color-name").text(users[u].name);
+        
+        request(URL + action + SID + objectID, "GET", "json", loadQuiz);
+        
+        $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
+          role: "page",
+          transition: "flip"
+        });
+        
+        break;
+      } else {
+        generateError(id, "<p>Wrong Username or Password!</p>");
       }
     }
   } else {
-    result = -2;
-  }
-  
-  switch(result) {
-    case -2:
-      GenerateError(id, "<p>You missed your Username or Password!</p>");
-      break;
-    case -1:
-      GenerateError(id, "<p>Wrong Username or Password!</p>");
-      break;
-    default:
-      Request(URL + action + SID + objectID, "GET", "json", LoadQuiz);
-      $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
-        role: "page",
-        transition: "flip"
-      });
-      break;
+    generateError(id, "<p>You missed your Username or Password!</p>");
   }
 }
 
 // Generate popup error information
-function GenerateError(id, error) {
+function generateError(id, error) {
   $(id + " p").remove("p");
   $(id).append(error);
   $(id).popup("open");
 }
 
 /* Checks user acount when login button is clicked*/
-function LoadUser() {
+function loadUser() {
   // Make a request to find user account.
-  Request(URL + action + SID + "&objectid=users.json", "GET", "json", CheckUser);
+  request(URL + action + SID + "&objectid=users.json", "GET", "json", checkUser);
  
 }
 
-/* TODO:
- * It will be implemented in Assignment02 */
-function RegisterUser() {
+/* Gets all information from register form,
+ * validades, then update the data base if all true.*/
+function registerUser() {
  
   var data = $("#register_form").serialize().split("&");
   var obj={};
@@ -95,95 +76,118 @@ function RegisterUser() {
   }
   
   for (var i in obj) {
-    if (obj[i] !== "") {
-      if (!CheckInputs(i, obj[i])) {
-        break;
+    if (checkInputs(i, obj[i])) {
+      if (i === "email") {
+        data = JSON.stringify(obj);
+        var url = URL + "action=append" + SID + "&objectid=users.json&data=" + data;
+        request(url, "POST", "post", logOff); 
       }
     } else {
-      GenerateError("#register_error", "<p>Please, fill all inputs up!</p>");
       break;
     }
-  }
-  
-  data = JSON.stringify(obj);
-   
-  //var url = URL + "action=append" + SID + "&objectid=users.json&data=" + data;
-  
-  //Request(url, "POST", "post", LogOff); 
+  }  
 }
 
-function CheckInputs(key, value) {
+/* Checks all inputs from different forms, 
+ * it must return true to pass to next step */
+function checkInputs(key, value) {
   
   var result = false;
   
-  switch(key) {
-    case "username":
-      CheckUsername(value);
-      break;
-    case "password":
-      CheckPassword(value);
-      break;
-    case "name":
-      CheckName(value);
-      break;
-    case "email":
-      CheckEmail(value);
-      break;
+  if (value !== "") {
+    switch(key) {
+      case "username":
+        if(checkUsername(value)) result = true;
+        break;
+      case "password":
+        if(checkPassword(value)) result = true;
+        break;
+      case "name":
+        if(checkName(value)) result = true;
+        break;
+      case "email":
+        if(checkEmail()) result = true;;
+        break;
+    }
+  } else {
+    generateError("#register_error", "<p>Please, fill all inputs up!</p>");
+  }  
+  return result;
+}
+
+/* Checks username and present errors if fail */
+function checkUsername(value) {
+  var result = false;
+   
+  let regex = /^(\w+)$/;
+
+  if (value.length < 4 || value.length > 10) {
+    generateError("#register_error", "<p>Username must have between 4 and 10 characters!</p>");
+  } else if (!value.match(regex)) {
+    generateError("#register_error", "<p>Username accepts letters and numbers only!</p>");
+  } else {
+    result = true;
+    request(URL + action + SID + "&objectid=users.json", "GET", "json", function(data) {
+      
+      for (var u in data) {
+        if (data[u].username === value) {
+          generateError("#register_error", "<p>Username already taken!</p>");
+          result = false;
+          break;
+        }
+      }
+      
+    });
+  }
+   
+  return result;
+}
+
+/* Checks password and present errors if fail */
+function checkPassword(value) {
+  var result = false;
+  
+  if (value.length < 5 || value.length > 15) {
+    generateError("#register_error", "<p>Please, Password must have between 5 and 15 characters!</p>");
+  } else {
+    result = true;
+  }
+  
+  return result;
+}
+
+/* Checks name and present errors if fail */
+function checkName(value) {
+  var result = false;
+  
+  let regex = /^([a-zA-Z\s])+$/;
+  
+  if (value.length < 2 || value.length > 40) {
+    generateError("#register_error", "<p>Please, Full name must have between 2 and 40 characters!</p>");
+  } else if (!value.match(regex)) {
+    generateError("#register_error", "<p>Please, Full name accepts letters only!</p>");
+  } else {
+    result = true;
+  }
+  
+  return result;
+}
+
+/* Checks email and present errors if fail */
+function checkEmail() {
+  var result = false;
+  let value = $("#email").val();
+  let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  
+  if (!value.match(regex)) {
+    generateError("#register_error", "<p>Please, Use a valid email!</p>");
+  } else {
+    result = true;
   }
   return result;
 }
 
-function CheckUsername(value) {
-  
-  Request(URL + action + SID + "&objectid=users.json", "GET", "json", function(data) {
-    let regex = /^(\w+)$/;
-
-    if (value.length < 4 || value.length > 10) {
-      GenerateError("#register_error", "<p>Username must have between 4 and 10 characters!</p>");
-    } else if (!value.match(regex)) {
-      GenerateError("#register_error", "<p>Username accepts letters and numbers only!</p>");
-    } else {
-      
-      for (var u in data) {
-        if (data[u].username === value) {
-          GenerateError("#register_error", "<p>Username already taken!</p>");
-          break;
-        }
-      }
-    }
-    
-  });
-  
-}
-
-function CheckPassword(value) {
-  
-  if (value.length < 5 || value.length > 15) {
-    GenerateError("#register_error", "<p>Please, Password must have between 5 and 15 characters!</p>");
-  }
-}
-
-function CheckName(value) {
-  
-  let regex = /^([a-zA-Z\s])+/;
-  
-  if (value.length < 2 || value.length > 40) {
-    GenerateError("#register_error", "<p>Please, Full name must have between 2 and 40 characters!</p>");
-  } else if (!value.match(regex)) {
-    GenerateError("#register_error", "<p>Please, Full name accepts letters only!</p>");
-  }
-}
-
-function CheckEmail(value) {
-  
-  let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  
-  if (!value.match(regex)) {
-    GenerateError("#register_error", "<p>Please, Use a valid email!</p>");
-  }
-}
-
-function Request(url, type, dataType, callBack) {
+function request(url, type, dataType, callBack) {
   $.ajax ({
     url: url,
     type: type,
@@ -191,25 +195,22 @@ function Request(url, type, dataType, callBack) {
     complete: function () {
       // This callback function will trigger on data sent/received complete
       console.log("COMPLETE...");
- 
     },
     success: function(data) {
       callBack(data);
     },
-    error: function (error) {
+    error: function () {
       // This callback function will trigger on unsuccessful action                
-      console.log(error);
+      console.log("error");
     }
   });
 }
 
 /* Logs off and clear all values 
  * and return to #login page*/
-function LogOff() {
-  //TODO delete all cookies and clear inputs
-  $('#login_form').trigger("reset");
-  $('#register_form').trigger("reset");
-  
+function logOff() {
+  clearForms();
+
   $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html", { 
     role: "page",
     transition: "flip",
@@ -217,17 +218,25 @@ function LogOff() {
   });
 }
 
+function clearForms() {
+  $("form").trigger("reset");
+  $(".question").empty();
+  $("#qpp").empty();
+  disableElement("#nextBtn");
+  disableElement("#prevBtn");
+}
+
 /* Loads the page which passes through
  * the parameter apge and creates its
  * JQuery Mobile UI*/
 function loadPage(page) {
   $(":mobile-pagecontainer").pagecontainer("change", page);
-  $( '.ui-content' ).trigger( 'create' );
+  $(".ui-content").trigger("create");
 }
 
 /* Loads and generates a list of
  * all quizzes available from json file*/
-function LoadQuiz(quiz) {
+function loadQuiz(quiz) {
   object = quiz;
 
   var list = "";
@@ -235,7 +244,9 @@ function LoadQuiz(quiz) {
   /* Loops through the quiz object and
    * convert it into HTML list tags */
   for (var i in quiz) {
-    list += "<li><a href=\"#\" data-prefetch=\"true\" id="+ quiz[i].id +" class=\"quiz-item\" data-transition=\"slide\">" + quiz[i].title + "</a></li>";
+    list += "<li>\n\
+            <a href=\"#\" data-prefetch=\"true\" id="+ quiz[i].id +" class=\"quiz-item\" data-transition=\"slide\">" + quiz[i].title + "</a>\n\
+            </li>";
   }
 
   // Inserts the list into #q-list 
@@ -247,23 +258,17 @@ function LoadQuiz(quiz) {
   /* Event listener to catch the clicked 
    * quiz item in the quiz list
    * then keeps id in let id constants*/
-  $(".quiz-item").click(function(){
-    let id = $(this).attr("id");
-    // Generates a cookie to be used in #question
-    document.cookie = "quiz="+id;
-    
-    selectObject();
-    //loadJsonFile(URL + action + SID + objectID, "GET", selectObject);
+  $(".quiz-item").click(function(){    
+    selectObject($(this).attr("id"));
   }); 
 }
 
 /* Compares the selected quiz with
  * all the available in the json
  * file, then generates the quiz page*/
-function selectObject() {
-  let id = getCookie("quiz");
+function selectObject(quizId) {
   for (var i in object) {
-    if (object[i].id === id) {
+    if (object[i].id === quizId) {
       generateQuizPage(object[i]);
       break;
     }
@@ -272,29 +277,19 @@ function selectObject() {
 
 /* Generates parts of a quiz page*/
 function generateQuizPage(selectedQuiz) {
-    
+  // quiz holds all questions from the selected quiz 
   quiz = selectedQuiz;
   
   // Generates head title from the selected quiz
   generateHeaderTitle(quiz.title);
   
-  // Finds which quiz was selected
+  // Gets all questions from the selected quiz
   getQuestions();
 }
 
 // Generates head title from the selected quiz
 function generateHeaderTitle(title) {
   $(".title").text(title);
-}
-
-/* Removes every element inside both forms:
- * .question and #qpp, so it can be added again
- * when user returns to #quiz-list page */
-function clearPageForm() {
-  $(".question").empty();
-  $("#qpp").empty();
-  disableElement("#nextBtn");
-  disableElement("#prevBtn");
 }
 
 /* Gets all questions from selected quiz and 
@@ -312,7 +307,12 @@ function getQuestions() {
     generateQuestionsPerPage();
     
     // Loads #questionPerPage page
-    loadPage("#questionPerPage");
+    $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#questionPerPage", {
+      role: "page",
+      transition: "slide"
+    });
+    $(".ui-content").trigger("create");
+    
   } else {
     questions = 1;
     // Shows first question in #question page
@@ -327,7 +327,7 @@ function generateQuestionList() {
 
   // creates a DOM element for each question
   quiz.questions.forEach(function(q) {
-    $(".question").append(BuildQuestions(q));
+    $(".question").append(buildQuestions(q));
   });
 
   $(".question div").first().addClass("first");
@@ -341,64 +341,66 @@ function generateQuestionList() {
  * generate DOM elements to be added on when 
  * user selects a quiz, it will check every 
  * question type and select the right one. */
-function BuildQuestions(question) {
-    var q = "";
-    var id = "q" + question.id;
-    
-    switch (question.type) {
-      case "date" :
-        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
-        q += "<input type="+question.type+" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
-        break;
-      case "textbox" :
-        if (question.help === undefined) question.help = "";
-        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
-        q += "<input type=\"text\" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
-        break;
-      case "textarea" :
-        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
-        q += "<textarea cols=\"40\" rows=\"5\" name="+question.id+" id="+question.id+">"+question.help+"</textarea></div>";
-        break;
-      case "choice" :
-        q += "<div class=\"ui-field-contain\" id="+id+"><label class=\"select\" for="+question.id+">"+question.text+"</label>";
-        q += "<select name="+question.id+" id="+question.id+" data-inline=\"true\">";
+function buildQuestions(question) {
+  var q = "";
+  var id = "q" + question.id;
+
+  switch (question.type) {
+    case "date" :
+      q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+      q += "<input type="+question.type+" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
+      break;
+    case "textbox" :
+      if (question.help === undefined) question.help = "";
+      q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+      q += "<input type=\"text\" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
+      if (question.hasOwnProperty("validate")) {
+        //TODO validade input
+      }
+      break;
+    case "textarea" :
+      q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+      q += "<textarea cols=\"40\" rows=\"5\" name="+question.id+" id="+question.id+">"+question.help+"</textarea></div>";
+      break;
+    case "choice" :
+      q += "<div class=\"ui-field-contain\" id="+id+"><label class=\"select\" for="+question.id+">"+question.text+"</label>";
+      q += "<select name="+question.id+" id="+question.id+" data-inline=\"true\">";
+      question.options.forEach(function(a) {
+        q += "<option value="+a+">"+a+"</option>";
+      });
+      q += "</select></div>";    
+      break;
+      case "slidingoption" :
+        q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>"; 
         question.options.forEach(function(a) {
-          q += "<option value="+a+">"+a+"</option>";
+          q += "<input type=\"radio\" name="+question.id+" id="+a+" value="+a+" checked>";
+          q += "<label for="+a+">"+a+"</label>";
         });
-        q += "</select></div>";    
-        break;
-        case "slidingoption" :
-          q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>"; 
-          question.options.forEach(function(a) {
-            q += "<input type=\"radio\" name=\"radio01\" id="+a+" value="+a+">";
-            q += "<label for="+a+">"+a+"</label>";
-          });
-          q += "<br>";
-          question.optionVisuals.forEach(function(a) {
-            q += "<input type=\"radio\" name=\"radio02\" id="+a+" value="+a+">";
-            q += "<label for="+a+">"+a+"</label>";
-          });
-          q += "</div>";
-          break;
-      case "scale" :
-        q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
-        if (question.hasOwnProperty("gradientStart")) {
-          q += "<input type=\"range\" onchange=\"changeBackgroundColor("+question.id+")\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
-        } else {
-          q += "<input type=\"range\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
-        }
-        break;
-      case "multiplechoice" :
-        q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>";
-         question.options.forEach(function(a) {
-            q += "<input type=\"checkbox\" name="+a+" id="+a+" value="+a+">";
-            q += "<label for="+a+">"+a+"</label>";
-          });
+        question.optionVisuals.forEach(function(a) {
+          q += "<input type=\"radio\" name="+question.id+" id="+a+" value="+a+" checked>";
+          q += "<label for="+a+">"+a+"</label>";
+        });
         q += "</div>";
         break;
-    }
-    return q;
-  };
+    case "scale" :
+      q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+      if (question.hasOwnProperty("gradientStart")) {
+        q += "<input type=\"range\" onchange=\"changeBackgroundColor("+question.id+")\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
+      } else {
+        q += "<input type=\"range\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
+      }
+      break;
+    case "multiplechoice" :
+      q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>";
+       question.options.forEach(function(a) {
+          q += "<input type=\"checkbox\" name="+question.id+" id="+a+" value="+a+">";
+          q += "<label for="+a+">"+a+"</label>";
+        });
+      q += "</div>";
+      break;
+  }
+  return q;
+};
 
 /* Generates first questions based on
  * the number passed as numOfQues parameter */
@@ -422,7 +424,11 @@ function getFirstQuestion(numOfQues) {
   enableElement("#nextBtn");
   
   // Loads page after all questions are appended into DOM
-  loadPage("#question");
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#question", {
+    role: "page",
+    transition: "slide"
+  });
+  $(".ui-content").trigger("create");
 }
 
 /* Generates a radio option for each index
@@ -456,7 +462,7 @@ function generateQuestionsPerPage() {
 
 /* Builds questions based on how many questions
  * are selected to be presented and button pressed*/
-function buildQuestions(bool) { 
+function presentQuestion(bool) { 
   
   let first = $(".active").first();
   let last = $(".active").last();
@@ -514,12 +520,12 @@ function nextQuestion() {
   if (index === quiz.questions.length) {
     disableElement("#nextBtn");
     enableElement("#prevBtn");
-    $(".question").append("<input type=\"submit\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
+    $(".question").append("<input type=\"button\" onclick=\"checkAnswers()\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
     loadPage("#question");
   } else {
     enableElement("#prevBtn");
   }
-  buildQuestions(true);
+  presentQuestion(true);
 }
 
 /* Function selects and build previous question
@@ -536,7 +542,7 @@ function prevQuestion() {
     enableElement("#nextBtn");
   }
   $("#submit").remove();
-  buildQuestions(false);
+  presentQuestion(false);
 }
 
 /* Updates #questionCounter based
@@ -581,15 +587,136 @@ function changeBackgroundColor(index) {
   color = "#" + color;
   $(".ui-slider-bg").css("background-color", color);
 }
+
+function checkAnswers() {
+  
+  score = 0;
+  
+  var userAnswer = buildAnswerObj($(".question").serializeArray());
+  
+  storageData("answers", userAnswer);
+  
+  var apiAnswer = quiz.questions;
+  
+  for (var i = 0; i < apiAnswer.length; i++) {
+    if (apiAnswer[i].hasOwnProperty("validate")) {
+      if(!checkValidation(userAnswer[apiAnswer[i].id], apiAnswer[i].validate, "<p>Please, type a valid SID number!</p>"))
+        break;
+    }
     
+    if (apiAnswer[i].hasOwnProperty("answer")) {
+      
+      if (typeof apiAnswer[i].answer !== "object") {
+        
+        if (apiAnswer[i].answer === userAnswer[apiAnswer[i].id]) {
+          score += apiAnswer[i].weighting;
+        }
+        
+      } else {
+        
+        if (apiAnswer[i].type === "multiplechoice") {
+          
+          if (apiAnswer[i].answer.length === userAnswer[apiAnswer[i].id].length) {
+            apiAnswer[i].answer.sort();
+            userAnswer[apiAnswer[i].id].sort();
+            
+            for (var k = 0; k < apiAnswer[i].answer.length; k++) {
+              
+              if ((apiAnswer[i].answer[k] === userAnswer[apiAnswer[i].id][k]) && (k + 1 === apiAnswer[i].answer.length)) {
+                score += apiAnswer[i].weighting;
+              } else if (apiAnswer[i].answer[k] === userAnswer[apiAnswer[i].id][k]) {
+                continue;
+              } else {
+                break;
+              }
+            }
+            
+          }
+          
+        } else {
+          for (var j in apiAnswer[i].answer) {
+            
+            if (apiAnswer[i].answer[j] === userAnswer[apiAnswer[i].id][0]) {
+              score += apiAnswer[i].weighting;
+              break;
+            }
+            
+          }
+        }
+        
+      }
+      
+    }
+  
+    if (i + 1 === apiAnswer.length) {
+      presentResult();
+    }
+  }
+
+}
+
+function buildAnswerObj(data) {
+ 
+  var obj = {};
+  
+  if (data.length >= quiz.questions.length) {
+    for (var i = 0; i < data.length; i++) {
+      if (typeof quiz.questions[data[i].name - 1].answer === "object") {
+
+        if (obj.hasOwnProperty(data[i].name)) {
+          obj[data[i].name].push(data[i].value);
+        } else {
+          obj[data[i].name] = [data[i].value];
+        }
+
+      } else {
+        obj[data[i].name] = data[i].value;
+      }
+    }
+  } else {
+    
+    for (var i = 0; i < quiz.questions.length; i++) {
+      if (typeof quiz.questions[i].answer === "object" && data[i] === undefined) {
+        obj[quiz.questions[i].id] = [""];
+      } else if (typeof quiz.questions[i].answer === "object") {
+        obj[data[i].name] = [data[i].value];
+      } else {
+        obj[data[i].name] = data[i].value;
+      }
+    }
+  }
+  
+  return obj;
+}
+
+function checkValidation(value, validation, message) {
+  
+  let regex = new RegExp(validation.replace(/["|/]/g, ""));
+  var result = false;
+  
+  if (!value.match(regex)) {
+    generateError("#answer_error", message);
+  } else {
+    var result = true;
+  }
+  
+  return result;
+}
+
+function storageData(name, data) {
+  
+  localStorage.setItem(name, JSON.stringify(data));
+  
+  //var retrieve = localStorage.getItem(name);
+  
+}
+
 function presentResult() {
+  // TODO generate table with results.
   
   
-  //var myObj = obj;
-  //var myJSON = JSON.stringify(myObj);
-  //localStorage.setItem("register", myJSON);
-  
-  console.log($(".question").serialize());
-  
-  //loadPage("#result");
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#result", { 
+    role: "page",
+    transition: "flip"
+  });
 }

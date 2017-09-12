@@ -9,3 +9,7 @@ body {
 h2, h1 {
   text-align: center;
 }
+
+#color-name {
+  color: #3388cc;
+}
