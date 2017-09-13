@@ -13,3 +13,118 @@ h2, h1 {
 #color-name {
   color: #3388cc;
 }
+
+h3 {
+  font-size: 1.4em;
+  color: #3388cc;
+  font-weight: 300;
+  font-family: 'Open Sans', sans-serif;
+}
+
+/* These apply across all breakpoints because they are outside of a media query */
+/* Make the labels light gray all caps across the board */
+.answer-list thead th,
+.answer-list tbody th .ui-table-cell-label,
+.answer-list tbody td .ui-table-cell-label {
+  text-transform: uppercase;
+  font-size: .7em;
+  color: rgba(0,0,0,0.5);
+  font-weight: normal;
+}
+/* White bg, large blue text for title */
+.answer-list tbody th {
+  font-size: 1.2em;
+  background-color: #fff;
+  color: #77bbff;
+  text-align: center;
+}
+/*  Add a bit of extra left padding for the title */
+.answer-list tbody td.title {
+  padding-left: .8em;
+}
+/* Add strokes */
+.answer-list thead th {
+  border-bottom: 1px solid #d6d6d6; /* non-RGBA fallback */
+  border-bottom: 1px solid rgba(0,0,0,.1);
+}
+.answer-list tbody th,
+.answer-list tbody td {
+  border-bottom: 1px solid #e6e6e6; /* non-RGBA fallback  */
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+/*  Custom stacked styles for mobile sizes */
+/*  Use a max-width media query so we don't have to undo these styles */
+@media (max-width: 40em) {
+  /*  Negate the margin between sections */
+  .answer-list tbody th {
+    margin-top: 0;
+    text-align: left;
+  }
+  /*  White bg, large blue text for title */
+  .answer-list tbody th,
+  .answer-list tbody td.title {
+    display: block;
+    font-size: 1.2em;
+    line-height: 110%;
+    padding: .5em .5em;
+    background-color: #fff;
+    color: #3388cc;
+    -moz-box-shadow: 0 1px 6px rgba(0,0,0,.1);
+    -webkit-box-shadow: 0 1px 6px rgba(0,0,0,.1);
+    box-shadow: 0 1px 6px rgba(0,0,0,.1);
+  }
+  /*  Hide labels for title */
+  .answer-list tbody th .ui-table-cell-label,
+  .answer-list tbody td.title .ui-table-cell-label {
+    display: none;
+  }
+  /*  Position the title, pad to the left */
+  .answer-list tbody td.title {
+    margin-top: -2.1em;
+    padding-left: 2.2em;
+    border-bottom: 1px solid rgba(0,0,0,.15);
+  }
+  /*  Make the data bold */
+  .answer-list th,
+  .answer-list td {
+    font-weight: bold;
+  }
+  /* Make the label elements a percentage width */
+  .answer-list td .ui-table-cell-label,
+  .answer-list th .ui-table-cell-label {
+    min-width: 20%;
+  }
+}
+
+/* Media query to show as a standard table at wider widths */
+@media ( min-width: 40em ) {
+  /* Show the table header rows */
+  .answer-list td,
+  .answer-list th,
+  .answer-list tbody th,
+  .answer-list tbody td,
+  .answer-list thead td,
+  .answer-list thead th {
+    display: table-cell;
+    margin: 0;
+  }
+  /* Hide the labels in each cell */
+  .answer-list td .ui-table-cell-label,
+  .answer-list th .ui-table-cell-label {
+    display: none;
+  }
+}
+/* Hack to make IE9 and WP7.5 treat cells like block level elements */
+/* Applied in a max-width media query up to the table layout breakpoint so we don't need to negate this */
+@media ( max-width: 40em ) {
+  .answer-list td,
+  .answer-list th {
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    float: left;
+    clear: left;
+  }
+}
+    

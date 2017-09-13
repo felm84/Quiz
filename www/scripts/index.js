@@ -221,6 +221,7 @@ function logOff() {
 function clearForms() {
   $("form").trigger("reset");
   $(".question").empty();
+  $("#answer-list").empty();
   $("#qpp").empty();
   disableElement("#nextBtn");
   disableElement("#prevBtn");
@@ -707,16 +708,34 @@ function storageData(name, data) {
   
   localStorage.setItem(name, JSON.stringify(data));
   
-  //var retrieve = localStorage.getItem(name);
-  
 }
 
 function presentResult() {
-  // TODO generate table with results.
   
+  generateTable();
   
   $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#result", { 
     role: "page",
     transition: "flip"
   });
+}
+
+function generateTable() {
+  let answers = JSON.parse(localStorage.getItem("answers"));
+  
+  var table = "";
+  
+  for (var i in answers) {
+    table += "<tr>";
+    table += "<th class=\"title\">" + i + "</th>";
+    table += "<td>"+quiz.questions[i-1].text+"</td>";
+    table += "<td>" + answers[i] + "</td>";
+  }
+  
+  $("#answer-list").append(table);
+  $(".answer-list").table("refresh"); 
+}
+
+function clearResult() {
+  $("#answer-list").empty();
 }

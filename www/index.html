@@ -205,12 +205,28 @@
     <!-- FORM RESULT -->
     <div data-role="page" id="result">
       <div data-role="header" data-position="fixed">
-        <a href="#" data-rel="back" onclick="clearPageForm()" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <a href="#" onclick="clearResult()" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
         <h1 class="title">Quiz - Result</h1>
       </div>
       <br>
       <div data-role="main" class="ui-content">
-        
+        <h3>User's Answer List</h3>
+        <div>
+          <table data-role="table" class="answer-list" data-column-btn-theme="b" data-mode="reflow">
+            <thead>
+              <tr>
+                <th data-priority="1">ID:</th>
+                <th>Question:</th>
+                <th data-priority="2">User Answer:</th>
+              </tr>
+            </thead>
+            <tbody id="answer-list">
+              
+            </tbody>
+            
+          </table>
+        </div>
+        <input type="button" onclick="checkAnswers()" id="submit" data-theme="b" value="Save Answers">
       </div>
       <div data-role="footer" data-position="fixed">
         <h1>copyright deakin</h1>
