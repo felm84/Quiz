@@ -21,6 +21,14 @@ h3 {
   font-family: 'Open Sans', sans-serif;
 }
 
+.right {
+  background: green !important;
+}
+
+.wrong {
+  background: red !important;
+}
+
 /* These apply across all breakpoints because they are outside of a media query */
 /* Make the labels light gray all caps across the board */
 .answer-list thead th,

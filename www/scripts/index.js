@@ -521,7 +521,7 @@ function nextQuestion() {
   if (index === quiz.questions.length) {
     disableElement("#nextBtn");
     enableElement("#prevBtn");
-    $(".question").append("<input type=\"button\" onclick=\"checkAnswers()\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
+    $(".question").append("<input type=\"button\" onclick=\"buildAnswerObj()\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
     loadPage("#question");
   } else {
     enableElement("#prevBtn");
@@ -593,71 +593,58 @@ function checkAnswers() {
   
   score = 0;
   
-  var userAnswer = buildAnswerObj($(".question").serializeArray());
+  var ids = [];
   
-  storageData("answers", userAnswer);
+  let userAnswer = JSON.parse(localStorage.getItem("answers"));
   
-  var apiAnswer = quiz.questions;
+  let apiAnswer = quiz.questions;
   
-  for (var i = 0; i < apiAnswer.length; i++) {
-    if (apiAnswer[i].hasOwnProperty("validate")) {
-      if(!checkValidation(userAnswer[apiAnswer[i].id], apiAnswer[i].validate, "<p>Please, type a valid SID number!</p>"))
-        break;
-    }
+  apiAnswer.forEach(function(q) {
     
-    if (apiAnswer[i].hasOwnProperty("answer")) {
-      
-      if (typeof apiAnswer[i].answer !== "object") {
-        
-        if (apiAnswer[i].answer === userAnswer[apiAnswer[i].id]) {
-          score += apiAnswer[i].weighting;
+    if (q.hasOwnProperty("answer")) {
+      if (typeof q.answer !== "object") {
+        if (q.answer === userAnswer[q.id]) {
+          score += q.weighting;
+          ids.push(q.id);
         }
-        
       } else {
-        
-        if (apiAnswer[i].type === "multiplechoice") {
-          
-          if (apiAnswer[i].answer.length === userAnswer[apiAnswer[i].id].length) {
-            apiAnswer[i].answer.sort();
-            userAnswer[apiAnswer[i].id].sort();
+        if (q.type === "multiplechoice") {
+          if (q.answer.length === userAnswer[q.id].length) {
+            q.answer.sort();
+            userAnswer[q.id].sort();
             
-            for (var k = 0; k < apiAnswer[i].answer.length; k++) {
-              
-              if ((apiAnswer[i].answer[k] === userAnswer[apiAnswer[i].id][k]) && (k + 1 === apiAnswer[i].answer.length)) {
-                score += apiAnswer[i].weighting;
-              } else if (apiAnswer[i].answer[k] === userAnswer[apiAnswer[i].id][k]) {
+            for (var i = 0; i < q.answer.length; i++) {
+              if ((q.answer[i] === userAnswer[q.id][i]) && (i + 1 === q.answer.length)) {
+                score += q.weighting;
+                ids.push(q.id);
+              } else if (q.answer[i] === userAnswer[q.id][i]) {
                 continue;
               } else {
                 break;
               }
             }
-            
           }
-          
         } else {
-          for (var j in apiAnswer[i].answer) {
-            
-            if (apiAnswer[i].answer[j] === userAnswer[apiAnswer[i].id][0]) {
-              score += apiAnswer[i].weighting;
+          for (var i in q.answer) {
+            if (q.answer[i] === userAnswer[q.id][0]) {
+              score += q.weighting;
+              ids.push(q.id);
               break;
             }
-            
           }
         }
-        
       }
-      
     }
+    
+  });
   
-    if (i + 1 === apiAnswer.length) {
-      presentResult();
-    }
-  }
-
+  generateResult(ids);
 }
 
-function buildAnswerObj(data) {
+function buildAnswerObj() {
  
+  var data = $(".question").serializeArray();
+  var apiAnswer = quiz.questions;
   var obj = {};
   
   if (data.length >= quiz.questions.length) {
@@ -687,7 +674,20 @@ function buildAnswerObj(data) {
     }
   }
   
-  return obj;
+  for (var i = 0; i < apiAnswer.length; i++) {
+    if (apiAnswer[i].hasOwnProperty("validate")) {
+      if(!checkValidation(obj[apiAnswer[i].id], apiAnswer[i].validate, 
+      "<p>Please, type a valid data in question: " + apiAnswer[i].id + "</p>"))
+        break;
+    }
+    if (i + 1 === apiAnswer.length) {
+      storageData("answers", obj);
+      generateTable();
+      presentAnswers();
+    }
+  }
+  
+  
 }
 
 function checkValidation(value, validation, message) {
@@ -710,32 +710,63 @@ function storageData(name, data) {
   
 }
 
-function presentResult() {
+function presentAnswers() {
   
-  generateTable();
-  
-  $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#result", { 
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#answers", { 
     role: "page",
     transition: "flip"
   });
+  $(".ui-content").trigger("create");
 }
 
 function generateTable() {
+  
   let answers = JSON.parse(localStorage.getItem("answers"));
   
   var table = "";
+  
+  $("#save-check").empty();
+  $("#save-check").append("<input type=\"button\" onclick=\"saveQuiz()\"  data-theme=\"b\" value=\"Save Answers\">");
   
   for (var i in answers) {
     table += "<tr>";
     table += "<th class=\"title\">" + i + "</th>";
     table += "<td>"+quiz.questions[i-1].text+"</td>";
-    table += "<td>" + answers[i] + "</td>";
+    table += "<td>" + answers[i] + "</td></tr>";
+  }
+  
+  for (var q = 0; q < quiz.questions.length; q++) {
+    if (quiz.questions[q].hasOwnProperty("answer")) {
+      $("#save-check").empty();
+      $("#save-check").append("<input type=\"button\" onclick=\"checkAnswers()\"  data-theme=\"b\" value=\"Check Answers\">");
+      break;
+    }
   }
   
   $("#answer-list").append(table);
   $(".answer-list").table("refresh"); 
 }
 
-function clearResult() {
+function generateResult(idArray) {
+  
+  
+  $(".result-list").table("refresh");
+  presentResult();
+}
+
+function presentResult() {
+  
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#result", { 
+    role: "page",
+    transition: "flip"
+  });
+  $(".ui-content").trigger("create");
+}
+
+function clearTable() {
   $("#answer-list").empty();
+}
+
+function saveQuiz() {
+  
 }

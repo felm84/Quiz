@@ -123,6 +123,7 @@
 
       <div data-role="panel" data-position-fixed="true" data-display="overlay" data-theme="b" id="nav-panel">
         <ul data-role="listview">
+          <li data-icon="recycle"><a href="javascript:void(0)" onclick="loadLastResult()">Load Last Result</a></li>
           <li data-icon="delete"><a href="javascript:void(0)" data-rel="close">Close</a></li>
           <!-- To be added in Assignment02 <li><a href="javascript:void(0)">Load Quiz</a></li>-->
           <li data-icon="power"><a href="javascript:void(0)" onclick="logOff()">Logout</a></li>
@@ -202,11 +203,11 @@
       </div>
     </div>
     
-    <!-- FORM RESULT -->
-    <div data-role="page" id="result">
+    <!-- ANSWERS LIST PAGE -->
+    <div data-role="page" id="answers">
       <div data-role="header" data-position="fixed">
-        <a href="#" onclick="clearResult()" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
-        <h1 class="title">Quiz - Result</h1>
+        <a href="#" onclick="clearTable()" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <h1 class="title">Quiz - Answers</h1>
       </div>
       <br>
       <div data-role="main" class="ui-content">
@@ -226,7 +227,73 @@
             
           </table>
         </div>
-        <input type="button" onclick="checkAnswers()" id="submit" data-theme="b" value="Save Answers">
+        <br>
+        <div id="save-check">
+          
+        </div>
+        
+      </div>
+      <div data-role="footer" data-position="fixed">
+        <h1>copyright deakin</h1>
+      </div>
+    </div>
+    
+    <!-- RESULT PAGE -->
+    <div data-role="page" id="result">
+      <div data-role="header" data-position="fixed">
+        
+        <h1 class="title">Quiz - Result</h1>
+      </div>
+      <br>
+      <div data-role="main" class="ui-content">
+        <h3>Result</h3>
+        <div>
+          <table data-role="table" class="answer-list" data-column-btn-theme="b" data-mode="reflow">
+            <thead>
+              <tr>
+                <th data-priority="1">Id:</th>
+                <th>Question:</th>
+                <th data-priority="2">User Answer:</th>
+                <th data-priority="4"></th>
+                <th data-priority="3">Score:</th>
+              </tr>
+            </thead>
+            <tbody id="result-list">
+              <tr>
+                <th class="title">1</th>
+                <td>Question 1</td>
+                <td>Australia</td>
+                <td><a href="#" class="wrong ui-btn ui-icon-delete ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext"></a></td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <th class="title">2</th>
+                <td>Question 1</td>
+                <td>Australia</td>
+                <td><a href="#" class="right ui-btn ui-icon-check ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext"></a></td>
+                <td>5</td>
+              </tr>
+              <tr>
+                <th class="title">3</th>
+                <td>Question 1</td>
+                <td>Australia</td>
+                <td><a href="#" class="wrong ui-btn ui-icon-delete ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext"></a></td>
+                <td>0</td>
+              </tr>
+            </tbody>
+            
+          </table>
+        </div>
+        <br>
+        <div class="ui-grid-a">
+          <div class="ui-block-a"><div class="ui-bar ui-bar-a">Total Score:</div></div>
+          <div class="ui-block-b"><div class="ui-bar ui-bar-a">50</div></div>
+        </div>
+        <br>
+        <div>
+          <input type="button" onclick="saveQuiz()"  data-theme="b" value="Save Result">
+        </div>
+        
       </div>
       <div data-role="footer" data-position="fixed">
         <h1>copyright deakin</h1>
