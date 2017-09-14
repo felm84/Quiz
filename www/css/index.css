@@ -19,6 +19,8 @@ h3 {
   color: #3388cc;
   font-weight: 300;
   font-family: 'Open Sans', sans-serif;
+  border-bottom: solid 1px #3388cc;
+  border-right: solid 1px #3388cc;
 }
 
 .right {

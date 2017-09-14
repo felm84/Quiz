@@ -27,13 +27,16 @@ function checkUser(users) {
   
   let id = "#login_error";
   
+  let pass = SHA256($("#pass").val());
+  
   if ($("#user").val() !== "" && $("#pass").val() !== "") {
     for (var u in users) {
-      if ($("#user").val() === users[u].username && $("#pass").val() === users[u].password) {
+      if ($("#user").val() === users[u].username && pass === users[u].password) {
                 
         $("#color-name").text(users[u].name);
         
-        request(URL + action + SID + objectID, "GET", "json", loadQuiz);
+        //request(URL + action + SID + objectID, "GET", "json", loadQuiz);
+        request("json/quizzes.json", "GET", "json", loadQuiz);
         
         $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
           role: "page",
@@ -60,7 +63,9 @@ function generateError(id, error) {
 /* Checks user acount when login button is clicked*/
 function loadUser() {
   // Make a request to find user account.
-  request(URL + action + SID + "&objectid=users.json", "GET", "json", checkUser);
+  //request(URL + action + SID + "&objectid=users.json", "GET", "json", checkUser);
+  
+  request("json/users.json", "GET", "json", checkUser);
  
 }
 
@@ -593,9 +598,9 @@ function checkAnswers() {
   
   score = 0;
   
-  var ids = [];
+  var rightAnswers = [];
   
-  let userAnswer = JSON.parse(localStorage.getItem("answers"));
+  let userAnswers = JSON.parse(localStorage.getItem("answers"));
   
   let apiAnswer = quiz.questions;
   
@@ -603,21 +608,21 @@ function checkAnswers() {
     
     if (q.hasOwnProperty("answer")) {
       if (typeof q.answer !== "object") {
-        if (q.answer === userAnswer[q.id]) {
+        if (q.answer === userAnswers[q.id]) {
           score += q.weighting;
-          ids.push(q.id);
+          rightAnswers.push(q.id);
         }
       } else {
         if (q.type === "multiplechoice") {
-          if (q.answer.length === userAnswer[q.id].length) {
+          if (q.answer.length === userAnswers[q.id].length) {
             q.answer.sort();
-            userAnswer[q.id].sort();
+            userAnswers[q.id].sort();
             
             for (var i = 0; i < q.answer.length; i++) {
-              if ((q.answer[i] === userAnswer[q.id][i]) && (i + 1 === q.answer.length)) {
+              if ((q.answer[i] === userAnswers[q.id][i]) && (i + 1 === q.answer.length)) {
                 score += q.weighting;
-                ids.push(q.id);
-              } else if (q.answer[i] === userAnswer[q.id][i]) {
+                rightAnswers.push(q.id);
+              } else if (q.answer[i] === userAnswers[q.id][i]) {
                 continue;
               } else {
                 break;
@@ -626,9 +631,9 @@ function checkAnswers() {
           }
         } else {
           for (var i in q.answer) {
-            if (q.answer[i] === userAnswer[q.id][0]) {
+            if (q.answer[i] === userAnswers[q.id][0]) {
               score += q.weighting;
-              ids.push(q.id);
+              rightAnswers.push(q.id);
               break;
             }
           }
@@ -638,7 +643,7 @@ function checkAnswers() {
     
   });
   
-  generateResult(ids);
+  generateResult(rightAnswers, userAnswers);
 }
 
 function buildAnswerObj() {
@@ -747,10 +752,41 @@ function generateTable() {
   $(".answer-list").table("refresh"); 
 }
 
-function generateResult(idArray) {
+function generateResult(rightAnswers, userAnswers) {
+  $("#result-list").empty();
   
+  let right = "<td><p class=\"right ui-btn ui-icon-check ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext\"></p></td>";
+  let wrong = "<td><p class=\"wrong ui-btn ui-icon-delete ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext\"></p></td>";
   
-  $(".result-list").table("refresh");
+  var table = "";
+  
+  quiz.questions.forEach(function(q){
+    // Block of code build a table row 
+    table += "<tr>";
+    table += "<th class=\"title\">" + q.id + "</th>";
+    table += "<td>" + q.text + "</td>";
+    table += "<td>" + userAnswers[q.id] + "</td>";
+    
+    if (q.hasOwnProperty("answer")) {
+      for (var a = 0; a < rightAnswers.length; a++) {
+        if (rightAnswers[a] === q.id) {
+          table += right;
+          table += "<td>+ " + q.weighting + "</td>";
+          break;
+        } else if (a + 1 === rightAnswers.length) {
+          table += wrong;
+          table += "<td>0</td>";
+        }
+      }
+    }
+    
+    // Closes the table row every loop
+    table += "</tr>";
+  });
+  
+  $("#result-list").append(table);
+  $("#total-score").text(score);
+  $(".answer-list").table("refresh");
   presentResult();
 }
 

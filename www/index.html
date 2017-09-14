@@ -19,6 +19,7 @@
     <link href="css/index.css" rel="stylesheet" type="text/css"/>
     <script src="scripts/jquery.js" type="text/javascript"></script>
     <script src="scripts/jquery.mobile-1.4.5.js" type="text/javascript"></script>
+    <script src="scripts/hash.js" type="text/javascript"></script>
     <script src="scripts/request.js" type="text/javascript"></script>
     <script src="scripts/index.js" type="text/javascript"></script>
     <title>Deakin - Quiz</title>
@@ -125,7 +126,6 @@
         <ul data-role="listview">
           <li data-icon="recycle"><a href="javascript:void(0)" onclick="loadLastResult()">Load Last Result</a></li>
           <li data-icon="delete"><a href="javascript:void(0)" data-rel="close">Close</a></li>
-          <!-- To be added in Assignment02 <li><a href="javascript:void(0)">Load Quiz</a></li>-->
           <li data-icon="power"><a href="javascript:void(0)" onclick="logOff()">Logout</a></li>
         </ul>
       </div><!-- /panel -->
@@ -241,7 +241,7 @@
     <!-- RESULT PAGE -->
     <div data-role="page" id="result">
       <div data-role="header" data-position="fixed">
-        
+        <a href="#quiz-list" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left" data-transition="slide" data-direction="reverse">Quizzes</a>
         <h1 class="title">Quiz - Result</h1>
       </div>
       <br>
@@ -259,27 +259,7 @@
               </tr>
             </thead>
             <tbody id="result-list">
-              <tr>
-                <th class="title">1</th>
-                <td>Question 1</td>
-                <td>Australia</td>
-                <td><a href="#" class="wrong ui-btn ui-icon-delete ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext"></a></td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <th class="title">2</th>
-                <td>Question 1</td>
-                <td>Australia</td>
-                <td><a href="#" class="right ui-btn ui-icon-check ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext"></a></td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <th class="title">3</th>
-                <td>Question 1</td>
-                <td>Australia</td>
-                <td><a href="#" class="wrong ui-btn ui-icon-delete ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext"></a></td>
-                <td>0</td>
-              </tr>
+              
             </tbody>
             
           </table>
@@ -287,7 +267,7 @@
         <br>
         <div class="ui-grid-a">
           <div class="ui-block-a"><div class="ui-bar ui-bar-a">Total Score:</div></div>
-          <div class="ui-block-b"><div class="ui-bar ui-bar-a">50</div></div>
+          <div class="ui-block-b"><div class="ui-bar ui-bar-a" id="total-score">0</div></div>
         </div>
         <br>
         <div>
