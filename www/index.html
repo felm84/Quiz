@@ -206,7 +206,7 @@
     <!-- ANSWERS LIST PAGE -->
     <div data-role="page" id="answers">
       <div data-role="header" data-position="fixed">
-        <a href="#" onclick="clearTable()" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
+        <a href="#" onclick="clearTables()" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-icon-back ui-btn-icon-left" data-transition="slide" data-direction="reverse">Back</a>
         <h1 class="title">Quiz - Answers</h1>
       </div>
       <br>
@@ -241,7 +241,7 @@
     <!-- RESULT PAGE -->
     <div data-role="page" id="result">
       <div data-role="header" data-position="fixed">
-        <a href="#quiz-list" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left" data-transition="slide" data-direction="reverse">Quizzes</a>
+        <a href="#quiz-list" onclick="clearForms(), clearTables()" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left" data-transition="slide" data-direction="reverse">Quizzes</a>
         <h1 class="title">Quiz - Result</h1>
       </div>
       <br>
@@ -281,4 +281,5 @@
     </div>
     
   </body>
+  
 </html>

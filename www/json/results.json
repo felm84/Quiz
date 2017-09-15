@@ -1,0 +1,48 @@
+[
+  {
+    "username": "admin",
+    "results": [
+      {
+        "id": "1",
+        "quiz-id": "quiz02",
+        "answers": {
+          "1": "2342",
+          "2": "Felipe",
+          "3": "canberra",
+          "4": ["wa"],
+          "5": "Melbourne",
+          "6": ["ACT", "NT"]
+        }
+      },
+      {
+        "id": "2",
+        "quiz-id": "quiz02",
+        "answers": {
+          "1": "2342",
+          "2": "Felipe",
+          "3": "canberra",
+          "4": ["wa"],
+          "5": "Melbourne",
+          "6": ["ACT", "NT"]
+        }
+      }
+    ]
+  },
+  {
+    "username": "foo",
+    "results": [
+      {
+        "id": "1",
+        "quiz-id": "quiz02",
+        "answers": {
+          "1": "123456",
+          "2": "Fooooo",
+          "3": "Canberra",
+          "4": ["NT"],
+          "5": "Melbourne",
+          "6": ["ACT", "NT"]
+        }
+      }
+    ]
+  }
+]

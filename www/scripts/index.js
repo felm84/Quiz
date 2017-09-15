@@ -11,22 +11,24 @@
  * index = holds number of questions in #questionCounter
  * object = hold all quizzes object from quizzes.json file
  * questions = holds the number of questions selected in questions per page */
-let URL = "http://introtoapps.com/datastore.php?";
-let SID = "&appid=215242834";
-var action = "action=load";
-var objectID = "&objectid=quizzes.json";
+
 var index = 0;
 var object;
 var quiz;
 var questions = 1;
 var score = 0;
 
+//$(document).ready(checkInternetConnection);
+
+function checkInternetConnection() {
+  if (!navigator.onLine) {
+    generateError("#login_error", "<p>Internet connection is required!</p>");
+  }    
+}
+
 
 /* Checks user acount when form login is submitted*/
 function checkUser(users) {
-  
-  let id = "#login_error";
-  
   let pass = SHA256($("#pass").val());
   
   if ($("#user").val() !== "" && $("#pass").val() !== "") {
@@ -35,8 +37,7 @@ function checkUser(users) {
                 
         $("#color-name").text(users[u].name);
         
-        //request(URL + action + SID + objectID, "GET", "json", loadQuiz);
-        request("json/quizzes.json", "GET", "json", loadQuiz);
+        request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=quizzes.json", "GET", "json", loadQuiz);
         
         $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
           role: "page",
@@ -45,11 +46,11 @@ function checkUser(users) {
         
         break;
       } else {
-        generateError(id, "<p>Wrong Username or Password!</p>");
+        generateError("#login_error", "<p>Wrong Username or Password!</p>");
       }
     }
   } else {
-    generateError(id, "<p>You missed your Username or Password!</p>");
+    generateError("#login_error", "<p>You missed your Username or Password!</p>");
   }
 }
 
@@ -63,29 +64,32 @@ function generateError(id, error) {
 /* Checks user acount when login button is clicked*/
 function loadUser() {
   // Make a request to find user account.
-  //request(URL + action + SID + "&objectid=users.json", "GET", "json", checkUser);
-  
-  request("json/users.json", "GET", "json", checkUser);
- 
+  request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", checkUser);
+   
 }
 
 /* Gets all information from register form,
  * validades, then update the data base if all true.*/
 function registerUser() {
  
-  var data = $("#register_form").serialize().split("&");
+  var data = $("#register_form").serializeArray();
   var obj={};
-  for(var key in data)
-  {
-    obj[data[key].split("=")[0]] = data[key].split("=")[1];
-  }
+  
+  // Loop converts data serialized into an object.
+  data.forEach(function(a){
+    obj[a.name] = a.value;
+  });
   
   for (var i in obj) {
     if (checkInputs(i, obj[i])) {
+      // When obj.password is reached it applies sha256 cryptography password
+      if (i === "password") obj[i] = SHA256(obj[i]);
+      // Email represents the last index of obj
       if (i === "email") {
         data = JSON.stringify(obj);
-        var url = URL + "action=append" + SID + "&objectid=users.json&data=" + data;
-        request(url, "POST", "post", logOff); 
+        
+        // Updates users.json file with a new user
+        request("http://introtoapps.com/datastore.php?action=append&appid=215242834&objectid=users.json&data="+data, "POST", "", logOff);
       }
     } else {
       break;
@@ -115,7 +119,7 @@ function checkInputs(key, value) {
         break;
     }
   } else {
-    generateError("#register_error", "<p>Please, fill all inputs up!</p>");
+    generateError("#register_error", "<p>Please, fill all inputs!</p>");
   }  
   return result;
 }
@@ -132,7 +136,8 @@ function checkUsername(value) {
     generateError("#register_error", "<p>Username accepts letters and numbers only!</p>");
   } else {
     result = true;
-    request(URL + action + SID + "&objectid=users.json", "GET", "json", function(data) {
+    
+    request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", function(data) {
       
       for (var u in data) {
         if (data[u].username === value) {
@@ -141,7 +146,6 @@ function checkUsername(value) {
           break;
         }
       }
-      
     });
   }
    
@@ -204,9 +208,10 @@ function request(url, type, dataType, callBack) {
     success: function(data) {
       callBack(data);
     },
-    error: function () {
-      // This callback function will trigger on unsuccessful action                
-      console.log("error");
+    error: function (xhr, status, error) {
+      console.log(xhr.status);
+      console.log(xhr.responseText);
+      console.log(error);
     }
   });
 }
@@ -215,7 +220,7 @@ function request(url, type, dataType, callBack) {
  * and return to #login page*/
 function logOff() {
   clearForms();
-
+  clearTables();
   $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html", { 
     role: "page",
     transition: "flip",
@@ -223,13 +228,35 @@ function logOff() {
   });
 }
 
+// Remove all elements from especific forms
 function clearForms() {
+  // Reset all form's values
   $("form").trigger("reset");
+  
+  /* Remove all elements from form 
+   * with class question
+   * in QUESTIONS PAGE */
   $(".question").empty();
-  $("#answer-list").empty();
+  
+  /* Remove all elements from form 
+   * with id qpp (questions per page)
+   * in QUESTIONS PER PAGE */
   $("#qpp").empty();
+  
+  // Disable both next and previows buttons
   disableElement("#nextBtn");
   disableElement("#prevBtn");
+}
+
+// Remove all elements from especific tables
+function clearTables() {
+  /* Remove all elements from id answer-list
+   * in ANSWERS LIST PAGE */
+  $("#answer-list").empty();
+  
+  /* Remove all elements from id result-list
+   * in RESULT PAGE */
+  $("#result-list").empty();
 }
 
 /* Loads the page which passes through
@@ -527,6 +554,7 @@ function nextQuestion() {
     disableElement("#nextBtn");
     enableElement("#prevBtn");
     $(".question").append("<input type=\"button\" onclick=\"buildAnswerObj()\" id=\"submit\" data-theme=\"b\" value=\"Submit Quiz\">");
+    //TODO fix it
     loadPage("#question");
   } else {
     enableElement("#prevBtn");
@@ -608,7 +636,7 @@ function checkAnswers() {
     
     if (q.hasOwnProperty("answer")) {
       if (typeof q.answer !== "object") {
-        if (q.answer === userAnswers[q.id]) {
+        if (q.answer.toString().toUpperCase() === userAnswers[q.id].toString().toUpperCase()) {
           score += q.weighting;
           rightAnswers.push(q.id);
         }
@@ -619,7 +647,8 @@ function checkAnswers() {
             userAnswers[q.id].sort();
             
             for (var i = 0; i < q.answer.length; i++) {
-              if ((q.answer[i] === userAnswers[q.id][i]) && (i + 1 === q.answer.length)) {
+              if ((q.answer[i].toString().toUpperCase() === userAnswers[q.id][i].toString().toUpperCase()) 
+              && (i + 1 === q.answer.length)) {
                 score += q.weighting;
                 rightAnswers.push(q.id);
               } else if (q.answer[i] === userAnswers[q.id][i]) {
@@ -631,7 +660,7 @@ function checkAnswers() {
           }
         } else {
           for (var i in q.answer) {
-            if (q.answer[i] === userAnswers[q.id][0]) {
+            if (q.answer[i].toString().toUpperCase() === userAnswers[q.id][0].toString().toUpperCase()) {
               score += q.weighting;
               rightAnswers.push(q.id);
               break;
@@ -640,7 +669,6 @@ function checkAnswers() {
         }
       }
     }
-    
   });
   
   generateResult(rightAnswers, userAnswers);
@@ -691,8 +719,6 @@ function buildAnswerObj() {
       presentAnswers();
     }
   }
-  
-  
 }
 
 function checkValidation(value, validation, message) {
@@ -799,10 +825,9 @@ function presentResult() {
   $(".ui-content").trigger("create");
 }
 
-function clearTable() {
-  $("#answer-list").empty();
-}
-
 function saveQuiz() {
+  
+  let userAnswers = JSON.parse(localStorage.getItem("answers"));
+  var saveObj = {};
   
 }
