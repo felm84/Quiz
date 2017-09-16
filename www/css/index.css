@@ -23,6 +23,10 @@ h3 {
   border-right: solid 1px #3388cc;
 }
 
+.error {
+  color: red;
+}
+
 .right {
   background: green !important;
 }

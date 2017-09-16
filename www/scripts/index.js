@@ -9,16 +9,116 @@
 
 /* GLOBAL VARIABLES
  * index = holds number of questions in #questionCounter
- * object = hold all quizzes object from quizzes.json file
- * questions = holds the number of questions selected in questions per page */
+ * quiz = holds all quiz object information from the selected quiz in quizzes.json file
+ * questions = holds the number of questions selected in questions per page
+ * score = holds the total amount of weighting earned */
 
 var index = 0;
-var object;
 var quiz;
 var questions = 1;
 var score = 0;
+var username;
 
 //$(document).ready(checkInternetConnection);
+
+$(document).ready(function() {
+  
+  // Holds the timeout function
+  var wakeUp;
+  
+  $("input").on({
+    focus: function() {
+      let input = this;
+      wakeUp = setTimeout(function() {
+        checkInput(input);
+      }, 3000);
+    },
+    keyup: function() {
+      // Keyup check input, then add error if any
+      checkInput(this);
+    },
+    
+    blur: function() {
+      //let input = this;
+      clearTimeout(wakeUp);
+      removeInputError(this);
+      checkInput(this);
+    },
+    
+    keydown: function() {
+      clearTimeout(wakeUp);
+      removeInputError(this);
+    }
+  });
+  
+});
+
+function checkInput(input) {
+  let inputType = $(input).attr("name");
+  let inputValue = $(input).val();
+  var result = false;
+  
+  if(inputValue === "") {
+    addInputError(input, "Please, fill this input!");
+  } else {
+    switch(inputType) {
+      case "username":
+        // TODO validate input then present error if return false
+        result = checkUsername(input, inputValue);
+        break;
+      case "password":
+        // TODO validate input then present error if return false
+        result = checkPassword(input, inputValue);
+        break;
+      case "name":
+        // TODO validate input then present error if return false
+        result = checkName(input, inputValue);
+        break;
+      case "email":
+        // TODO validate input then present error if return false
+        result = checkEmail(input, inputValue);
+        break;
+    }
+  }
+  return result;
+}
+
+function addInputError(input, message) {
+  let p =  "<p class='error'>";
+  let error = $(p).text(message);
+  let parent = $(input).parent();
+  
+  // Checks if error is present, if so it changes the message
+  if($(parent).next().hasClass("error")) {
+    $(parent).next().text(message);
+    
+    // Else it presents the error
+  } else {
+    $(parent).after(error);
+  }
+  
+  // Adds red shadown around the input
+  addRedShadow(input);
+}
+
+function removeInputError(input) {
+  let parent = $(input).parent();
+  
+  // Removes the erro from input
+  if($(parent).next().hasClass("error")) {
+    $(parent).next().remove();
+  }
+  
+  removeRedShadow(input);
+}
+
+function addRedShadow(input) {
+  $(input).css("box-shadow", "0 0 10px red");
+}
+
+function removeRedShadow(input) {
+  $(input).css("box-shadow", "");
+}
 
 function checkInternetConnection() {
   if (!navigator.onLine) {
@@ -26,31 +126,56 @@ function checkInternetConnection() {
   }    
 }
 
-
 /* Checks user acount when form login is submitted*/
-function checkUser(users) {
-  let pass = SHA256($("#pass").val());
+function checkUser() {
   
-  if ($("#user").val() !== "" && $("#pass").val() !== "") {
-    for (var u in users) {
-      if ($("#user").val() === users[u].username && pass === users[u].password) {
-                
-        $("#color-name").text(users[u].name);
-        
-        request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=quizzes.json", "GET", "json", loadQuiz);
-        
-        $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
-          role: "page",
-          transition: "flip"
-        });
-        
-        break;
-      } else {
-        generateError("#login_error", "<p>Wrong Username or Password!</p>");
-      }
-    }
+  // Converts the form into an array of objects
+  var data = $("#login_form").serializeArray();
+  
+  var obj = {};
+  
+  // Loop converts data serialized into an object.
+  data.forEach(function(a){
+    obj[a.name] = a.value;
+  });
+  
+  if (obj.user === "") {
+    addInputError($("#user"), "Please, type your username!");
+  } else if (obj.pass === "") {
+    addInputError($("#pass"), "Please, type your password!");
   } else {
-    generateError("#login_error", "<p>You missed your Username or Password!</p>");
+    // Converts password input value to sha256 cryptography value
+    obj.pass = SHA256(obj.pass);
+    
+    // Make a request to find user account.
+    request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", function(users) {
+      // Then a loop runs until users last object in users.json
+      for (var u in users) {
+        // It compares username and password typed to users.json data
+        if (obj.user === users[u].username && obj.pass === users[u].password) {
+          // Updates the username global variable;
+          username = users[u].username;
+          
+          // Presents the user full name and login is succeful
+          $("#color-name").text(users[u].name);
+
+          // Request loads all available quizzes from quizzes.json
+          request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=quizzes.json", "GET", "json", loadQuiz);
+
+          // Changes from index page to #quiz-list page
+          $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
+            role: "page",
+            transition: "flip"
+          });
+          
+          // Break out of loop when username and password match 
+          break;
+        } else {
+          // Generates a pop up error when username or password is wrong
+          generateError("#login_error", "<p>Wrong Username or Password!</p>");
+        }
+      }   
+    });
   }
 }
 
@@ -59,13 +184,6 @@ function generateError(id, error) {
   $(id + " p").remove("p");
   $(id).append(error);
   $(id).popup("open");
-}
-
-/* Checks user acount when login button is clicked*/
-function loadUser() {
-  // Make a request to find user account.
-  request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", checkUser);
-   
 }
 
 /* Gets all information from register form,
@@ -81,83 +199,61 @@ function registerUser() {
   });
   
   for (var i in obj) {
-    if (checkInputs(i, obj[i])) {
-      // When obj.password is reached it applies sha256 cryptography password
-      if (i === "password") obj[i] = SHA256(obj[i]);
-      // Email represents the last index of obj
-      if (i === "email") {
+    if (checkInput($("#"+i))) {
+      if (i === "password") {
+        obj[i] = SHA256(obj[i]);
+      } else if (i === "email") {
         data = JSON.stringify(obj);
-        
+
         // Updates users.json file with a new user
         request("http://introtoapps.com/datastore.php?action=append&appid=215242834&objectid=users.json&data="+data, "POST", "", logOff);
       }
     } else {
       break;
     }
-  }  
-}
-
-/* Checks all inputs from different forms, 
- * it must return true to pass to next step */
-function checkInputs(key, value) {
-  
-  var result = false;
-  
-  if (value !== "") {
-    switch(key) {
-      case "username":
-        if(checkUsername(value)) result = true;
-        break;
-      case "password":
-        if(checkPassword(value)) result = true;
-        break;
-      case "name":
-        if(checkName(value)) result = true;
-        break;
-      case "email":
-        if(checkEmail()) result = true;;
-        break;
-    }
-  } else {
-    generateError("#register_error", "<p>Please, fill all inputs!</p>");
-  }  
-  return result;
+  }    
 }
 
 /* Checks username and present errors if fail */
-function checkUsername(value) {
+function checkUsername(input, value) {
   var result = false;
-   
+  
+  // Regular expression (letters and numbers)
   let regex = /^(\w+)$/;
-
-  if (value.length < 4 || value.length > 10) {
-    generateError("#register_error", "<p>Username must have between 4 and 10 characters!</p>");
-  } else if (!value.match(regex)) {
-    generateError("#register_error", "<p>Username accepts letters and numbers only!</p>");
-  } else {
-    result = true;
+  
+  // Checks if input value length is between 4 and 10 
+    if (value.length < 4 || value.length > 10) {
+      addInputError(input, "Username must have between 4 and 10 characters!");
     
-    request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", function(data) {
-      
-      for (var u in data) {
-        if (data[u].username === value) {
-          generateError("#register_error", "<p>Username already taken!</p>");
-          result = false;
-          break;
+      // Checks if input value match regular expression
+    } else if (!value.match(regex)) {
+      addInputError(input, "Username accepts letters and numbers only!");
+
+      // Else loops through all users and check if user already exist
+    } else {
+      result = true;
+      // Makes request to get all users in users.json file
+      request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", function(data) {    
+        for (var u in data) {
+          if (data[u].username === value) {
+            addInputError(input, "Username has already been taken!");
+            result = false;
+            break;
+          }
         }
-      }
-    });
-  }
-   
+      });
+    }
   return result;
 }
 
 /* Checks password and present errors if fail */
-function checkPassword(value) {
+function checkPassword(input, value) {
   var result = false;
-  
+    
+  // Checks if input value length is between 5 and 15 characters
   if (value.length < 5 || value.length > 15) {
-    generateError("#register_error", "<p>Please, Password must have between 5 and 15 characters!</p>");
+    addInputError(input, "Password must have between 5 and 15 characters!");
+    
   } else {
     result = true;
   }
@@ -166,15 +262,20 @@ function checkPassword(value) {
 }
 
 /* Checks name and present errors if fail */
-function checkName(value) {
+function checkName(input, value) {
   var result = false;
   
+  // Regular expression(letters only)
   let regex = /^([a-zA-Z\s])+$/;
   
+  // Checks if input value is between 2 and 40 characters
   if (value.length < 2 || value.length > 40) {
-    generateError("#register_error", "<p>Please, Full name must have between 2 and 40 characters!</p>");
+    addInputError(input, "Full name must have between 2 and 40 characters!");
+    
+   // Checks if input value matches regular expression 
   } else if (!value.match(regex)) {
-    generateError("#register_error", "<p>Please, Full name accepts letters only!</p>");
+    addInputError(input, "Full name accepts letters only!");
+    
   } else {
     result = true;
   }
@@ -183,13 +284,16 @@ function checkName(value) {
 }
 
 /* Checks email and present errors if fail */
-function checkEmail() {
+function checkEmail(input, value) {
   var result = false;
-  let value = $("#email").val();
+  
+  // Regular expression(xx@xx.com or xx@xx.com.au)
   let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   
+  // Checks if input value matches regular expression
   if (!value.match(regex)) {
-    generateError("#register_error", "<p>Please, Use a valid email!</p>");
+    addInputError(input, "Please, type a valid email!");
+    
   } else {
     result = true;
   }
@@ -269,17 +373,15 @@ function loadPage(page) {
 
 /* Loads and generates a list of
  * all quizzes available from json file*/
-function loadQuiz(quiz) {
-  object = quiz;
-
+function loadQuiz(quizzes) {
   var list = "";
   
   /* Loops through the quiz object and
    * convert it into HTML list tags */
-  for (var i in quiz) {
+  for (var i in quizzes) {
     list += "<li>\n\
-            <a href=\"#\" data-prefetch=\"true\" id="+ quiz[i].id +" class=\"quiz-item\" data-transition=\"slide\">" + quiz[i].title + "</a>\n\
-            </li>";
+      <a href=\"#\" data-prefetch=\"true\" id="+ quizzes[i].id +" class=\"quiz-item\" data-transition=\"slide\">" + quizzes[i].title + "</a>\n\
+      </li>";
   }
 
   // Inserts the list into #q-list 
@@ -292,17 +394,17 @@ function loadQuiz(quiz) {
    * quiz item in the quiz list
    * then keeps id in let id constants*/
   $(".quiz-item").click(function(){    
-    selectObject($(this).attr("id"));
+    selectObject($(this).attr("id"), quizzes);
   }); 
 }
 
 /* Compares the selected quiz with
  * all the available in the json
  * file, then generates the quiz page*/
-function selectObject(quizId) {
-  for (var i in object) {
-    if (object[i].id === quizId) {
-      generateQuizPage(object[i]);
+function selectObject(quizId, quizzes) {
+  for (var i in quizzes) {
+    if (quizzes[i].id === quizId) {
+      generateQuizPage(quizzes[i]);
       break;
     }
   }
@@ -757,7 +859,7 @@ function generateTable() {
   var table = "";
   
   $("#save-check").empty();
-  $("#save-check").append("<input type=\"button\" onclick=\"saveQuiz()\"  data-theme=\"b\" value=\"Save Answers\">");
+  $("#save-check").append("<input type=\"button\" onclick=\"saveResult()\"  data-theme=\"b\" value=\"Save Answers\">");
   
   for (var i in answers) {
     table += "<tr>";
@@ -825,9 +927,34 @@ function presentResult() {
   $(".ui-content").trigger("create");
 }
 
-function saveQuiz() {
+function saveResult() {
   
+  let user = "result-" + username;
   let userAnswers = JSON.parse(localStorage.getItem("answers"));
-  var saveObj = {};
+  let quizId = quiz.id;
+  let result = JSON.stringify(buildResultObj(quizId, userAnswers));
   
+  request("http://introtoapps.com/datastore.php?action=list&appid=215242834", "GET", "json", function(results) {
+    
+    for (var r = 0; r < results.length; r++) {
+      // Looks for same username
+      if (results[r] === user) {  
+        // If found, it will append the result
+        request("http://introtoapps.com/datastore.php?action=append&appid=215242834&objectid="+user+"&data="+result, "POST", "", alert);
+        
+        break;
+      } else if (r + 1 === results.length){
+        request("http://introtoapps.com/datastore.php?action=save&appid=215242834&objectid="+user+"&data=["+result+"]", "POST", "", alert);
+      }
+    }
+  });
+}
+
+function buildResultObj(quizId, answers) {
+  var result = {  
+    "quiz-id": quizId,
+    "answers": answers   
+  };
+
+  return result;
 }
