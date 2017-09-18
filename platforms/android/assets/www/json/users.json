@@ -1,16 +1,14 @@
 [
   {
     "username": "admin",
-    "password": "123",
-    "name": "Felipe Menezes",
-    "email": "felipe@felipe.com.au",
-    "save": true
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "name": "Administrator",
+    "email": "adm@adm.com"
   },
   {
-    "username": "felm",
-    "password": "123",
-    "name": "Felm Menezes",
-    "email": "felm@felm.com.au",
-    "save": false
+    "username": "foo",
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "name": "Foo Data",
+    "email": "foo@foo.com"
   }
 ]

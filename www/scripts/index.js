@@ -54,9 +54,8 @@ $(document).ready(function() {
       removeInputError(this);
     }
   });
-  
 });
-
+  
 function checkInput(input) {
   let inputType = $(input).attr("name");
   let inputValue = $(input).val();
@@ -165,7 +164,7 @@ function checkUser() {
 
           // Request loads all available quizzes from quizzes.json
           request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=quizzes.json", "GET", "json", "#quiz-list_error", loadQuiz);
-
+ 
           // Changes from index page to #quiz-list page
           $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
             role: "page",

@@ -77,7 +77,7 @@
         "id": 3,
         "text": "What is the capital of Australia?",
         "type": "textbox",
-        "answer": "Australia",
+        "answer": "Canberra",
         "weighting": 5
       },
       {
@@ -103,8 +103,6 @@
         "answer": ["ACT", "NT"],
         "weighting": 5
       }
-
     ]
   }
-  
 ]
