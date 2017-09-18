@@ -23,6 +23,13 @@ h3 {
   border-right: solid 1px #3388cc;
 }
 
+.ui-popup p{
+  background: white;
+  margin: 0;
+  padding: 1em;
+  color: black;
+}
+
 .error {
   color: red;
 }

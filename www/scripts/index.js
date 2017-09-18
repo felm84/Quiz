@@ -11,13 +11,17 @@
  * index = holds number of questions in #questionCounter
  * quiz = holds all quiz object information from the selected quiz in quizzes.json file
  * questions = holds the number of questions selected in questions per page
- * score = holds the total amount of weighting earned */
+ * score = holds the total amount of weighting earned
+ * username = holds the username value to be used in   */
 
 var index = 0;
 var quiz;
 var questions = 1;
 var score = 0;
 var username;
+var quizList;
+
+localStorage.clear();
 
 //$(document).ready(checkInternetConnection);
 
@@ -148,7 +152,7 @@ function checkUser() {
     obj.pass = SHA256(obj.pass);
     
     // Make a request to find user account.
-    request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", function(users) {
+    request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", "#login_error", function(users) {
       // Then a loop runs until users last object in users.json
       for (var u in users) {
         // It compares username and password typed to users.json data
@@ -160,7 +164,7 @@ function checkUser() {
           $("#color-name").text(users[u].name);
 
           // Request loads all available quizzes from quizzes.json
-          request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=quizzes.json", "GET", "json", loadQuiz);
+          request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=quizzes.json", "GET", "json", "#quiz-list_error", loadQuiz);
 
           // Changes from index page to #quiz-list page
           $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#quiz-list", {
@@ -181,8 +185,7 @@ function checkUser() {
 
 // Generate popup error information
 function generateError(id, error) {
-  $(id + " p").remove("p");
-  $(id).append(error);
+  $(id + " p").text(error);
   $(id).popup("open");
 }
 
@@ -206,7 +209,7 @@ function registerUser() {
         data = JSON.stringify(obj);
 
         // Updates users.json file with a new user
-        request("http://introtoapps.com/datastore.php?action=append&appid=215242834&objectid=users.json&data="+data, "POST", "", logOff);
+        request("http://introtoapps.com/datastore.php?action=append&appid=215242834&objectid=users.json&data="+data, "POST", "", "#register_error", logOff);
       }
     } else {
       break;
@@ -233,7 +236,7 @@ function checkUsername(input, value) {
     } else {
       result = true;
       // Makes request to get all users in users.json file
-      request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", function(data) {    
+      request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=users.json", "GET", "json", "#register_error", function(data) {    
         for (var u in data) {
           if (data[u].username === value) {
             addInputError(input, "Username has already been taken!");
@@ -300,7 +303,7 @@ function checkEmail(input, value) {
   return result;
 }
 
-function request(url, type, dataType, callBack) {
+function request(url, type, dataType, errorId, callBack) {
   $.ajax ({
     url: url,
     type: type,
@@ -313,6 +316,8 @@ function request(url, type, dataType, callBack) {
       callBack(data);
     },
     error: function (xhr, status, error) {
+      generateError(errorId, xhr.status + " - " +  error);
+      
       console.log(xhr.status);
       console.log(xhr.responseText);
       console.log(error);
@@ -376,6 +381,8 @@ function loadPage(page) {
 function loadQuiz(quizzes) {
   var list = "";
   
+  quizList = quizzes;
+  
   /* Loops through the quiz object and
    * convert it into HTML list tags */
   for (var i in quizzes) {
@@ -394,46 +401,41 @@ function loadQuiz(quizzes) {
    * quiz item in the quiz list
    * then keeps id in let id constants*/
   $(".quiz-item").click(function(){    
-    selectObject($(this).attr("id"), quizzes);
+    selectObject(null, $(this).attr("id"), quizzes);
   }); 
 }
 
 /* Compares the selected quiz with
  * all the available in the json
  * file, then generates the quiz page*/
-function selectObject(quizId, quizzes) {
+function selectObject(answers, quizId, quizzes) {
   for (var i in quizzes) {
     if (quizzes[i].id === quizId) {
-      generateQuizPage(quizzes[i]);
+      generateQuizPage(answers, quizzes[i]);
       break;
     }
   }
 }
 
 /* Generates parts of a quiz page*/
-function generateQuizPage(selectedQuiz) {
+function generateQuizPage(answers, selectedQuiz) {
   // quiz holds all questions from the selected quiz 
   quiz = selectedQuiz;
   
   // Generates head title from the selected quiz
-  generateHeaderTitle(quiz.title);
+  $(".title").text(quiz.title);
   
   // Gets all questions from the selected quiz
-  getQuestions();
-}
-
-// Generates head title from the selected quiz
-function generateHeaderTitle(title) {
-  $(".title").text(title);
+  getQuestions(answers);
 }
 
 /* Gets all questions from selected quiz and 
  * finds out if quiz has option of question 
  * per page */
-function getQuestions() {
+function getQuestions(answers) {
   
   // Generates a list of all question in the DOM
-  generateQuestionList();
+  generateQuestionList(answers);
   
   // Finds out if selected quiz has questionsPerPage option
   if (quiz.hasOwnProperty('questionsPerPage')) {
@@ -458,12 +460,20 @@ function getQuestions() {
 /* Convert all questions from object variable
  * into DOM objects and append them into the
  * .question page */
-function generateQuestionList() {
-
-  // creates a DOM element for each question
-  quiz.questions.forEach(function(q) {
-    $(".question").append(buildQuestions(q));
-  });
+function generateQuestionList(answers) {
+  
+  if (answers !== null && answers["quiz-id"] === quiz.id) {
+    // creates a DOM element for each question
+    quiz.questions.forEach(function(q) {
+      $(".question").append(buildQuestions(q, answers.answers[q.id]));
+    });
+  } else {
+    // creates a DOM element for each question
+    quiz.questions.forEach(function(q) {
+      $(".question").append(buildQuestions(q, ""));
+    });
+  }
+  
 
   $(".question div").first().addClass("first");
   $(".question div").last().addClass("last");
@@ -476,59 +486,87 @@ function generateQuestionList() {
  * generate DOM elements to be added on when 
  * user selects a quiz, it will check every 
  * question type and select the right one. */
-function buildQuestions(question) {
+function buildQuestions(question, answer) {
   var q = "";
   var id = "q" + question.id;
-
+  
   switch (question.type) {
     case "date" :
       q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
-      q += "<input type="+question.type+" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
+      q += "<input type="+question.type+" name="+question.id+" id="+question.id+" value="+answer+" placeholder="+question.help+"></div>";
       break;
     case "textbox" :
       if (question.help === undefined) question.help = "";
       q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
-      q += "<input type=\"text\" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
+      if (answer !== "") {
+        q += "<input type=\"text\" name="+question.id+" id="+question.id+" value="+answer+"></div>";
+      } else {
+        q += "<input type=\"text\" name="+question.id+" id="+question.id+" placeholder="+question.help+"></div>";
+      }
+      
       if (question.hasOwnProperty("validate")) {
         //TODO validade input
       }
       break;
     case "textarea" :
       q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
-      q += "<textarea cols=\"40\" rows=\"5\" name="+question.id+" id="+question.id+">"+question.help+"</textarea></div>";
+      if (answer !== "") {
+        q += "<textarea cols=\"40\" rows=\"5\" name="+question.id+" id="+question.id+">"+answer+"</textarea></div>";
+      } else {
+        q += "<textarea cols=\"40\" rows=\"5\" name="+question.id+" id="+question.id+">"+question.help+"</textarea></div>";
+      }
       break;
     case "choice" :
       q += "<div class=\"ui-field-contain\" id="+id+"><label class=\"select\" for="+question.id+">"+question.text+"</label>";
       q += "<select name="+question.id+" id="+question.id+" data-inline=\"true\">";
       question.options.forEach(function(a) {
-        q += "<option value="+a+">"+a+"</option>";
+        if (answer === a) {
+          q += "<option value="+a+" selected>"+a+"</option>";
+        } else {
+          q += "<option value="+a+">"+a+"</option>";
+        } 
       });
       q += "</select></div>";    
       break;
       case "slidingoption" :
-        q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>"; 
-        question.options.forEach(function(a) {
-          q += "<input type=\"radio\" name="+question.id+" id="+a+" value="+a+" checked>";
-          q += "<label for="+a+">"+a+"</label>";
-        });
-        question.optionVisuals.forEach(function(a) {
-          q += "<input type=\"radio\" name="+question.id+" id="+a+" value="+a+" checked>";
-          q += "<label for="+a+">"+a+"</label>";
-        });
+        q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>";
+        for (var a = 0; a < question.options.length; a++) {
+          if (answer === question.options[a] || a + 1 === question.options.length) {
+            q += "<input type=\"radio\" name="+question.id+" id="+question.options[a]+" value="+question.options[a]+" checked>";
+          } else {
+            q += "<input type=\"radio\" name="+question.id+" id="+question.options[a]+" value="+question.options[a]+">";
+          }
+          q += "<label for="+question.options[a]+">"+question.options[a]+"</label>";
+        }
+        
+        for (var a = 0; a < question.options.length; a++) {
+          if (answer === question.optionVisuals[a] || a + 1 === question.optionVisuals.length) {
+            q += "<input type=\"radio\" name="+question.id+" id="+question.optionVisuals[a]+" value="+question.optionVisuals[a]+" checked>";
+          } else {
+            q += "<input type=\"radio\" name="+question.id+" id="+question.optionVisuals[a]+" value="+question.optionVisuals[a]+">";
+          }
+          q += "<label for="+question.optionVisuals[a]+">"+question.optionVisuals[a]+"</label>";
+        }
+
         q += "</div>";
         break;
     case "scale" :
       q += "<div class=\"ui-field-contain\" id="+id+"><label for="+question.id+">"+question.text+"</label>";
+      if (answer === "") answer = question.start;
       if (question.hasOwnProperty("gradientStart")) {
-        q += "<input type=\"range\" onchange=\"changeBackgroundColor("+question.id+")\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
+        q += "<input type=\"range\" onchange=\"changeBackgroundColor("+question.id+")\" name="+question.id+" id="+question.id+" value="+answer+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
       } else {
-        q += "<input type=\"range\" name="+question.id+" id="+question.id+" value="+question.start+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
+        q += "<input type=\"range\" name="+question.id+" id="+question.id+" value="+answer+" min="+question.start+" max="+question.end+" step="+question.increment+" data-highlight=\"true\"></div>";
       }
       break;
     case "multiplechoice" :
       q += "<div class=\"ui-field-contain\" id="+id+"><legend>"+question.text+"</legend>";
        question.options.forEach(function(a) {
-          q += "<input type=\"checkbox\" name="+question.id+" id="+a+" value="+a+">";
+         if (answer.indexOf(a) > -1) {
+           q += "<input type=\"checkbox\" name="+question.id+" id="+a+" value="+a+" checked>";
+         } else {
+           q += "<input type=\"checkbox\" name="+question.id+" id="+a+" value="+a+">";
+         } 
           q += "<label for="+a+">"+a+"</label>";
         });
       q += "</div>";
@@ -843,6 +881,7 @@ function storageData(name, data) {
   
 }
 
+// Changes the page to answers page
 function presentAnswers() {
   
   $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#answers", { 
@@ -852,15 +891,18 @@ function presentAnswers() {
   $(".ui-content").trigger("create");
 }
 
+// Generates the table result with all user answers
 function generateTable() {
-  
+  // Retrieve all user answers saved in local storage
   let answers = JSON.parse(localStorage.getItem("answers"));
   
+  // Holds table DOM elements
   var table = "";
   
-  $("#save-check").empty();
-  $("#save-check").append("<input type=\"button\" onclick=\"saveResult()\"  data-theme=\"b\" value=\"Save Answers\">");
+  // Set up button to save result
+  $("#save-check").html("<input type=\"button\" onclick=\"saveResult()\"  data-theme=\"b\" value=\"Save Answers\">");
   
+  // For each answer in answers it builds the table
   for (var i in answers) {
     table += "<tr>";
     table += "<th class=\"title\">" + i + "</th>";
@@ -868,26 +910,34 @@ function generateTable() {
     table += "<td>" + answers[i] + "</td></tr>";
   }
   
+  // Checks if quiz has answers to match with user's ones
   for (var q = 0; q < quiz.questions.length; q++) {
+    // If yes, it change the initial button from save result to check answers
     if (quiz.questions[q].hasOwnProperty("answer")) {
-      $("#save-check").empty();
-      $("#save-check").append("<input type=\"button\" onclick=\"checkAnswers()\"  data-theme=\"b\" value=\"Check Answers\">");
+      
+      $("#save-check").html("<input type=\"button\" onclick=\"checkAnswers()\"  data-theme=\"b\" value=\"Check Answers\">");
       break;
     }
   }
   
+  // Sets the table into the page and refreshes it to update jquery mobile UI
   $("#answer-list").append(table);
   $(".answer-list").table("refresh"); 
 }
 
+// Generates error marks if any in quizzes that have answers to match with user's one
 function generateResult(rightAnswers, userAnswers) {
+  // Clear any previous result in result-list id
   $("#result-list").empty();
   
+  // Holds right and wrong icons
   let right = "<td><p class=\"right ui-btn ui-icon-check ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext\"></p></td>";
   let wrong = "<td><p class=\"wrong ui-btn ui-icon-delete ui-shadow ui-corner-all ui-btn-inline ui-btn-icon-notext\"></p></td>";
   
+  // Holds table DOM elements
   var table = "";
   
+  // For each answer in answers it builds the table
   quiz.questions.forEach(function(q){
     // Block of code build a table row 
     table += "<tr>";
@@ -895,6 +945,8 @@ function generateResult(rightAnswers, userAnswers) {
     table += "<td>" + q.text + "</td>";
     table += "<td>" + userAnswers[q.id] + "</td>";
     
+    // If question has answer property it checks if matches the user's one
+    // and set the icon into table with score
     if (q.hasOwnProperty("answer")) {
       for (var a = 0; a < rightAnswers.length; a++) {
         if (rightAnswers[a] === q.id) {
@@ -912,12 +964,14 @@ function generateResult(rightAnswers, userAnswers) {
     table += "</tr>";
   });
   
+  // Sets the table into the page and refreshes it to update jquery mobile UI
   $("#result-list").append(table);
   $("#total-score").text(score);
   $(".answer-list").table("refresh");
   presentResult();
 }
 
+// Changes the page to result page
 function presentResult() {
   
   $( ":mobile-pagecontainer" ).pagecontainer( "change", "index.html#result", { 
@@ -927,29 +981,26 @@ function presentResult() {
   $(".ui-content").trigger("create");
 }
 
+// Saves user answers to be loaded as last quiz result
 function saveResult() {
-  
+  // Associates the result with username
   let user = "result-" + username;
+  
+  // Retrieves the user answers from local storage
   let userAnswers = JSON.parse(localStorage.getItem("answers"));
+  
+  // Gets the quiz id to be used when buildResultObj as a parameter
   let quizId = quiz.id;
+  
+  // Builds result object and turn it into a string
   let result = JSON.stringify(buildResultObj(quizId, userAnswers));
   
-  request("http://introtoapps.com/datastore.php?action=list&appid=215242834", "GET", "json", function(results) {
-    
-    for (var r = 0; r < results.length; r++) {
-      // Looks for same username
-      if (results[r] === user) {  
-        // If found, it will append the result
-        request("http://introtoapps.com/datastore.php?action=append&appid=215242834&objectid="+user+"&data="+result, "POST", "", alert);
-        
-        break;
-      } else if (r + 1 === results.length){
-        request("http://introtoapps.com/datastore.php?action=save&appid=215242834&objectid="+user+"&data=["+result+"]", "POST", "", alert);
-      }
-    }
-  });
+  // Request is made to sabe the result and returns to list of quizzes page
+  request("http://introtoapps.com/datastore.php?action=save&appid=215242834&objectid="+user+"&data="+result, "POST", "", "#result_error", returnToQuizzes);
+
 }
 
+// Builds an object with all answers to be saved in saveResult()
 function buildResultObj(quizId, answers) {
   var result = {  
     "quiz-id": quizId,
@@ -957,4 +1008,25 @@ function buildResultObj(quizId, answers) {
   };
 
   return result;
+}
+
+// Clear all forms, tables and return to list of quizzes
+function returnToQuizzes() {
+  clearForms();
+  clearTables();
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "#quiz-list", { 
+    role: "page",
+    transition: "flip",
+    reverse: true
+  });
+}
+
+// Loads last quiz answered by the user if exist
+function loadLastResult() {
+  
+  request("http://introtoapps.com/datastore.php?action=load&appid=215242834&objectid=result-" + username, "GET", "json", "#quiz-list_error", function(data) {
+    
+    selectObject(data, data["quiz-id"], quizList);
+    
+  });
 }
