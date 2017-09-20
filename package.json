@@ -11,7 +11,9 @@
     "license": "Apache-2.0",
     "dependencies": {
         "ajax-request": "1.2.3",
+        "android": "0.0.8",
         "cordova-android": "^6.2.3",
+        "cordova-plugin-splashscreen": "4.0.3",
         "cordova-plugin-whitelist": "1.3.2",
         "phonegap": "7.0.1"
     },
