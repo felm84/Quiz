@@ -21,64 +21,70 @@ var score = 0;
 var username;
 var quizList;
 
+// Clears local storage every start
 localStorage.clear();
-
-//$(document).ready(checkInternetConnection);
 
 $(document).ready(function() {
   
   // Holds the timeout function
   var wakeUp;
   
+  // Block of code with all event handler possible for inputs to be checked
   $("input").on({
+    // Checks input after 3 seconds of input focused and no action from user
     focus: function() {
       let input = this;
       wakeUp = setTimeout(function() {
         checkInput(input);
       }, 3000);
     },
+    // Checks input after key is up
     keyup: function() {
       // Keyup check input, then add error if any
       checkInput(this);
     },
-    
+    // Stops counting, removes error message and checks input when user leave input
     blur: function() {
-      //let input = this;
       clearTimeout(wakeUp);
       removeInputError(this);
       checkInput(this);
     },
-    
+    // Stops counting and removes error message when key is down
     keydown: function() {
       clearTimeout(wakeUp);
       removeInputError(this);
     }
   });
 });
-  
+
+// Checks input function 
 function checkInput(input) {
+  // Holds name from passed input
   let inputType = $(input).attr("name");
+  
+  // Holds value from passed input 
   let inputValue = $(input).val();
+  
+  // Validation
   var result = false;
   
+  // If input value is empty, it presents error under the input
   if(inputValue === "") {
     addInputError(input, "Please, fill this input!");
+    
+    // If is not empty, it checks the input value
   } else {
     switch(inputType) {
       case "username":
-        // TODO validate input then present error if return false
         result = checkUsername(input, inputValue);
         break;
       case "password":
-        // TODO validate input then present error if return false
         result = checkPassword(input, inputValue);
         break;
       case "name":
-        // TODO validate input then present error if return false
         result = checkName(input, inputValue);
         break;
       case "email":
-        // TODO validate input then present error if return false
         result = checkEmail(input, inputValue);
         break;
     }
@@ -86,6 +92,7 @@ function checkInput(input) {
   return result;
 }
 
+// Adds error right under the checked input
 function addInputError(input, message) {
   let p =  "<p class='error'>";
   let error = $(p).text(message);
@@ -104,10 +111,11 @@ function addInputError(input, message) {
   addRedShadow(input);
 }
 
+// Removes error right under the checked input
 function removeInputError(input) {
   let parent = $(input).parent();
   
-  // Removes the erro from input
+  // Removes the error from input
   if($(parent).next().hasClass("error")) {
     $(parent).next().remove();
   }
@@ -115,18 +123,14 @@ function removeInputError(input) {
   removeRedShadow(input);
 }
 
+// Add red color to the error message
 function addRedShadow(input) {
   $(input).css("box-shadow", "0 0 10px red");
 }
 
+// Removes red color to the error message
 function removeRedShadow(input) {
   $(input).css("box-shadow", "");
-}
-
-function checkInternetConnection() {
-  if (!navigator.onLine) {
-    generateError("#login_error", "<p>Internet connection is required!</p>");
-  }    
 }
 
 /* Checks user acount when form login is submitted*/
@@ -761,44 +765,69 @@ function changeBackgroundColor(index) {
   $(".ui-slider-bg").css("background-color", color);
 }
 
+// Checks answers from quizzes that have answers
 function checkAnswers() {
   
   score = 0;
   
+  // Holds all ids with right answer
   var rightAnswers = [];
   
+  // Gets all answers storaged in local storage
   let userAnswers = JSON.parse(localStorage.getItem("answers"));
   
+  // Gets all questions from selected quiz
   let apiAnswer = quiz.questions;
   
+  // Loops through each answer from user
   apiAnswer.forEach(function(q) {
     
+    // Checks if apiAnswer question has "answer" property
     if (q.hasOwnProperty("answer")) {
+      
+      // Checks type of answer is an object
       if (typeof q.answer !== "object") {
+        
+        // Checks if answer from user matches api
         if (q.answer.toString().toUpperCase() === userAnswers[q.id].toString().toUpperCase()) {
           score += q.weighting;
           rightAnswers.push(q.id);
         }
+        // If not an object
       } else {
+        // Checks if api question is multiplechoice
         if (q.type === "multiplechoice") {
+          
+          // Checks length from both api and user and sort them
           if (q.answer.length === userAnswers[q.id].length) {
             q.answer.sort();
             userAnswers[q.id].sort();
             
+            // Loops through each answer in api multiplechoice array
             for (var i = 0; i < q.answer.length; i++) {
+              
+              // If all indexes from the multiplechoice array passed, it gives score and push answer id into rightAnswers array
               if ((q.answer[i].toString().toUpperCase() === userAnswers[q.id][i].toString().toUpperCase()) 
               && (i + 1 === q.answer.length)) {
                 score += q.weighting;
                 rightAnswers.push(q.id);
+                
+                // If answers from both indexes arrays match, it continues
               } else if (q.answer[i] === userAnswers[q.id][i]) {
                 continue;
+                
+                // Any mismatch it breaks out of the loop  
               } else {
                 break;
               }
             }
           }
+          // If not multiplechoice, but still an object(array of answers)
         } else {
+          // Loops through the array in api question
           for (var i in q.answer) {
+            
+            // If answers from both indexes arrays match, it scores user, break out of loop and pushes id into rightAnswers array
             if (q.answer[i].toString().toUpperCase() === userAnswers[q.id][0].toString().toUpperCase()) {
               score += q.weighting;
               rightAnswers.push(q.id);
@@ -810,32 +839,54 @@ function checkAnswers() {
     }
   });
   
+  // Generates result
   generateResult(rightAnswers, userAnswers);
 }
 
+// Converts user answers into an object
 function buildAnswerObj() {
  
+  // Serializes all inputs from question class form
   var data = $(".question").serializeArray();
+  
+  // Holds all questions from selected quiz
   var apiAnswer = quiz.questions;
+  
+  // Object will hold user answers
   var obj = {};
   
+  // Checks if user answer length is equal or bigger than quiz one
   if (data.length >= quiz.questions.length) {
+    
+    // Loops through each answer from user
     for (var i = 0; i < data.length; i++) {
+      
+      //  Checks if current question is an object
       if (typeof quiz.questions[data[i].name - 1].answer === "object") {
 
+        // Checks if obj has alread an id alocated into it.
+        // If yes, it pushes the value into the array inside obj,
+        // If not, it creates an array with the value inside obj.
         if (obj.hasOwnProperty(data[i].name)) {
           obj[data[i].name].push(data[i].value);
         } else {
           obj[data[i].name] = [data[i].value];
         }
-
+        
+        // Set the name with correspondent value
       } else {
         obj[data[i].name] = data[i].value;
       }
     }
+    // If data length is smaller than quiz questions length
   } else {
-    
+    // Loops through all api questions
     for (var i = 0; i < quiz.questions.length; i++) {
+      
+      // Checks if current api question is an object and current user one is undefined.
+      // If true for both, it sets up the object property with empty array,
+      // else if it sets up the object property with an value in array,
+      // finally else, it sets up just the value without any array.
       if (typeof quiz.questions[i].answer === "object" && data[i] === undefined) {
         obj[quiz.questions[i].id] = [""];
       } else if (typeof quiz.questions[i].answer === "object") {
@@ -874,6 +925,7 @@ function checkValidation(value, validation, message) {
   return result;
 }
 
+// Storage objects into local storage
 function storageData(name, data) {
   
   localStorage.setItem(name, JSON.stringify(data));
