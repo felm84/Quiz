@@ -179,7 +179,7 @@ function checkUser() {
           break;
         } else {
           // Generates a pop up error when username or password is wrong
-          generateError("#login_error", "<p>Wrong Username or Password!</p>");
+          generateError("#login_error", "Wrong Username or Password!");
         }
       }   
     });
@@ -900,7 +900,7 @@ function buildAnswerObj() {
   for (var i = 0; i < apiAnswer.length; i++) {
     if (apiAnswer[i].hasOwnProperty("validate")) {
       if(!checkValidation(obj[apiAnswer[i].id], apiAnswer[i].validate, 
-      "<p>Please, type a valid data in question: " + apiAnswer[i].id + "</p>"))
+      "Please, type a valid data in question: " + apiAnswer[i].id))
         break;
     }
     if (i + 1 === apiAnswer.length) {
